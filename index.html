@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pacman Arcade</title>
+  <style>
+    :root {
+      --bg: #02030b;
+      --panel: #070a1f;
+      --panel-2: #0d1238;
+      --blue: #2446ff;
+      --blue-hot: #54a8ff;
+      --yellow: #ffed4a;
+      --pink: #ff4fa3;
+      --cyan: #4de7ff;
+      --red: #ff4f5e;
+      --orange: #ffad43;
+      --text: #f6f7ff;
+      --muted: #aeb8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(36, 70, 255, 0.26), transparent 34rem),
+        radial-gradient(circle at 10% 90%, rgba(255, 237, 74, 0.08), transparent 18rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Consolas, Monaco, "Courier New", monospace;
+    }
+
+    main {
+      width: min(96vw, 760px);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+    }
+
+    .marquee {
+      width: min(100%, 620px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid rgba(84, 168, 255, 0.55);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(13, 18, 56, 0.96), rgba(7, 10, 31, 0.96));
+      box-shadow: 0 0 24px rgba(36, 70, 255, 0.28), inset 0 0 18px rgba(84, 168, 255, 0.08);
+    }
+
+    .brand {
+      color: var(--yellow);
+      font-size: clamp(18px, 5vw, 28px);
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 12px rgba(255, 237, 74, 0.65);
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--yellow);
+      border-radius: 6px;
+      padding: 8px 12px;
+      background: #101540;
+      color: var(--yellow);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      box-shadow: inset 0 0 12px rgba(255, 237, 74, 0.08);
+    }
+
+    button:hover,
+    button:focus-visible {
+      background: #1a205e;
+      outline: none;
+      box-shadow: 0 0 16px rgba(255, 237, 74, 0.28);
+    }
+
+    .hud {
+      width: min(100%, 620px);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .hud-item {
+      min-height: 48px;
+      padding: 8px 10px;
+      border: 1px solid rgba(84, 168, 255, 0.35);
+      border-radius: 6px;
+      background: rgba(7, 10, 31, 0.86);
+      text-align: center;
+    }
+
+    .hud-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .hud-item strong {
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(100%, 620px);
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      border: 1px solid rgba(84, 168, 255, 0.55);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(4, 5, 18, 0.96), rgba(2, 3, 11, 0.96));
+      box-shadow: 0 0 34px rgba(36, 70, 255, 0.35);
+    }
+
+    canvas {
+      width: min(100%, 504px);
+      height: auto;
+      display: block;
+      background: #000;
+      border-radius: 6px;
+      image-rendering: auto;
+    }
+
+    .help {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .touch-pad {
+      display: none;
+      grid-template-columns: repeat(3, 46px);
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .touch-pad button {
+      width: 46px;
+      min-height: 42px;
+      padding: 0;
+    }
+
+    .touch-pad .empty {
+      visibility: hidden;
+    }
+
+    @media (max-width: 620px) {
+      main {
+        padding: 10px;
+      }
+
+      .marquee {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: center;
+      }
+
+      .hud {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .hud-item:last-child {
+        grid-column: span 2;
+      }
+
+      .touch-pad {
+        display: grid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="marquee" aria-label="Commandes principales">
+      <div class="brand">PACMAN ARCADE</div>
+      <div class="actions">
+        <button id="startBtn" type="button">Jouer</button>
+        <button id="pauseBtn" type="button">Pause</button>
+        <button id="musicBtn" type="button">Musique</button>
+        <button id="songBtn" type="button">Chanson 1984</button>
+        <button id="restartBtn" type="button">Redémarrer</button>
+      </div>
+    </section>
+
+    <section class="hud" aria-label="Tableau de score">
+      <div class="hud-item"><span>Score</span><strong id="score">0</strong></div>
+      <div class="hud-item"><span>Record</span><strong id="best">0</strong></div>
+      <div class="hud-item"><span>Niveau</span><strong id="level">1</strong></div>
+      <div class="hud-item"><span>Vies</span><strong id="lives">3</strong></div>
+      <div class="hud-item"><span>Restants</span><strong id="remaining">0</strong></div>
+    </section>
+
+    <section class="game-shell">
+      <canvas id="game" aria-label="Jeu Pacman"></canvas>
+    </section>
+
+    <p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
+
+    <section class="touch-pad" aria-label="Contrôles tactiles">
+      <button class="empty" tabindex="-1" type="button"></button>
+      <button data-dir="up" type="button">Haut</button>
+      <button class="empty" tabindex="-1" type="button"></button>
+      <button data-dir="left" type="button">Gauche</button>
+      <button data-dir="down" type="button">Bas</button>
+      <button data-dir="right" type="button">Droite</button>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const bestEl = document.getElementById("best");
+    const levelEl = document.getElementById("level");
+    const livesEl = document.getElementById("lives");
+    const remainingEl = document.getElementById("remaining");
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const musicBtn = document.getElementById("musicBtn");
+    const songBtn = document.getElementById("songBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    const layout = [
+      "#####################",
+      "#.........#.........#",
+      "#.###.###.#.###.###.#",
+      "#o# #.#     #.# # #o#",
+      "#.###.#.#####.#.###.#",
+      "#...................#",
+      "#.###.#.#####.#.###.#",
+      "#.....#...#...#.....#",
+      "#####.### # ###.#####",
+      "    #.#       #.#    ",
+      "#####.# ## ## #.#####",
+      "     .  #   #  .     ",
+      "#####.# ##### #.#####",
+      "    #.#       #.#    ",
+      "#####.# ##### #.#####",
+      "#.........#.........#",
+      "#.###.###.#.###.###.#",
+      "#o..#.....P.....#..o#",
+      "###.#.#.#####.#.#.###",
+      "#.....#...#...#.....#",
+      "#.#######.#.#######.#",
+      "#...................#",
+      "#####################"
+    ];
+
+    const rows = layout.length;
+    const cols = layout[0].length;
+    const tile = 24;
+    const dirs = {
+      up: { x: 0, y: -1, angle: Math.PI * 1.5 },
+      right: { x: 1, y: 0, angle: 0 },
+      down: { x: 0, y: 1, angle: Math.PI / 2 },
+      left: { x: -1, y: 0, angle: Math.PI }
+    };
+    const opposite = { up: "down", down: "up", left: "right", right: "left" };
+    const ghostHome = { x: 10, y: 11 };
+    const pacStart = { x: 10, y: 17 };
+
+    canvas.width = cols * tile;
+    canvas.height = rows * tile;
+
+    let pellets = new Set();
+    let powers = new Set();
+    let score = 0;
+    let best = Number(localStorage.getItem("pacmanBest") || 0);
+    let level = 1;
+    let lives = 3;
+    let gameState = "title";
+    let stateUntil = 0;
+    let pacman;
+    let ghosts = [];
+    let floaters = [];
+    let lastPlayerMove = 0;
+    let lastGhostMove = 0;
+    let audioCtx;
+    let musicTimer;
+    let musicEnabled = false;
+    let musicStep = 0;
+
+    function actor(x, y, dir, color, name) {
+      return { x, y, dir, nextDir: dir, color, name, frightened: 0, eaten: 0 };
+    }
+
+    function cellAt(x, y) {
+      return layout[y]?.[(x + cols) % cols] || "#";
+    }
+
+    function isWall(x, y) {
+      return cellAt(x, y) === "#";
+    }
+
+    function key(x, y) {
+      return `${x},${y}`;
+    }
+
+    function remainingDots() {
+      return pellets.size + powers.size;
+    }
+
+    function playerDelay() {
+      return Math.max(112, 170 - (level - 1) * 8);
+    }
+
+    function ghostDelay() {
+      return Math.max(118, 230 - (level - 1) * 10);
+    }
+
+    function updateHud() {
+      scoreEl.textContent = score;
+      bestEl.textContent = best;
+      levelEl.textContent = level;
+      livesEl.textContent = lives;
+      remainingEl.textContent = remainingDots();
+    }
+
+    function startAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+
+    function beep(freq, duration, type = "square", volume = 0.04) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playMusicStep() {
+      if (!musicEnabled || !audioCtx) return;
+      const melody = [392, 523, 659, 523, 440, 587, 740, 587, 392, 494, 622, 494, 330, 440, 554, 440];
+      const bass = [98, 98, 131, 131, 110, 110, 147, 147];
+      beep(melody[musicStep % melody.length], 0.075, "square", 0.018);
+      if (musicStep % 2 === 0) beep(bass[(musicStep / 2) % bass.length], 0.09, "triangle", 0.016);
+      musicStep += 1;
+    }
+
+    function updateMusicButton() {
+      musicBtn.textContent = musicEnabled ? "Musique ON" : "Musique";
+    }
+
+    function toggleMusic() {
+      startAudio();
+      musicEnabled = !musicEnabled;
+      if (musicEnabled && !musicTimer) {
+        musicTimer = setInterval(playMusicStep, 155);
+      }
+      if (!musicEnabled && musicTimer) {
+        clearInterval(musicTimer);
+        musicTimer = undefined;
+      }
+      updateMusicButton();
+    }
+
+    function award(points, x, y, label) {
+      score += points;
+      if (score > best) {
+        best = score;
+        localStorage.setItem("pacmanBest", String(best));
+      }
+      floaters.push({
+        x,
+        y,
+        text: label || `+${points}`,
+        born: performance.now(),
+        ttl: 780,
+        color: points >= 200 ? "#4de7ff" : "#fff6b3"
+      });
+      updateHud();
+    }
+
+    function buildLevel() {
+      pellets = new Set();
+      powers = new Set();
+      layout.forEach((row, y) => {
+        [...row].forEach((cell, x) => {
+          if (cell === ".") pellets.add(key(x, y));
+          if (cell === "o") powers.add(key(x, y));
+        });
+      });
+
+      pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
+      ghosts = [
+        actor(10, 9, "left", "#ff4f5e", "blinky"),
+        actor(9, 11, "up", "#4de7ff", "inky"),
+        actor(11, 11, "down", "#ff4fa3", "pinky"),
+        actor(10, 13, "right", "#ffad43", "clyde")
+      ];
+      floaters = [];
+      lastPlayerMove = 0;
+      lastGhostMove = 0;
+      gameState = "ready";
+      stateUntil = performance.now() + 1300;
+      updateHud();
+    }
+
+    function newGame() {
+      startAudio();
+      score = 0;
+      level = 1;
+      lives = 3;
+      buildLevel();
+      beep(660, 0.08);
+      beep(880, 0.1);
+    }
+
+    function nextLevel() {
+      level += 1;
+      buildLevel();
+      beep(740, 0.08);
+      beep(980, 0.1);
+    }
+
+    function canMove(unit, dirName) {
+      const dir = dirs[dirName];
+      return !isWall(unit.x + dir.x, unit.y + dir.y);
+    }
+
+    function moveUnit(unit) {
+      if (canMove(unit, unit.nextDir)) unit.dir = unit.nextDir;
+      if (!canMove(unit, unit.dir)) return false;
+      const dir = dirs[unit.dir];
+      unit.x = (unit.x + dir.x + cols) % cols;
+      unit.y += dir.y;
+      return true;
+    }
+
+    function eatDots() {
+      const dotKey = key(pacman.x, pacman.y);
+      if (pellets.delete(dotKey)) {
+        award(10, pacman.x, pacman.y);
+        beep(320, 0.025, "square", 0.025);
+      }
+      if (powers.delete(dotKey)) {
+        award(50, pacman.x, pacman.y, "+50 POWER");
+        ghosts.forEach((ghost) => {
+          ghost.frightened = 34 + level * 2;
+        });
+        beep(180, 0.08, "sawtooth", 0.035);
+      }
+      if (remainingDots() === 0 && gameState === "playing") {
+        gameState = "levelClear";
+        stateUntil = performance.now() + 1900;
+        award(500, pacman.x, pacman.y, "NIVEAU TERMINE");
+        beep(880, 0.12);
+        beep(1175, 0.14);
+      }
+    }
+
+    function chooseGhostDir(ghost) {
+      const options = Object.keys(dirs).filter((dirName) => {
+        return dirName !== opposite[ghost.dir] && canMove(ghost, dirName);
+      });
+      if (options.length === 0) return opposite[ghost.dir];
+
+      if (ghost.frightened > 0) {
+        return options[Math.floor(Math.random() * options.length)];
+      }
+
+      const scatter = ghost.name === "clyde" && Math.random() < 0.35;
+      return options.sort((a, b) => {
+        const da = dirs[a];
+        const db = dirs[b];
+        const ax = ghost.x + da.x;
+        const ay = ghost.y + da.y;
+        const bx = ghost.x + db.x;
+        const by = ghost.y + db.y;
+        const distA = Math.abs(ax - pacman.x) + Math.abs(ay - pacman.y);
+        const distB = Math.abs(bx - pacman.x) + Math.abs(by - pacman.y);
+        return scatter ? distB - distA : distA - distB;
+      })[0];
+    }
+
+    function moveGhosts() {
+      ghosts.forEach((ghost) => {
+        if (ghost.eaten > 0) {
+          ghost.eaten -= 1;
+          if (ghost.eaten === 0) {
+            ghost.x = ghostHome.x;
+            ghost.y = ghostHome.y;
+            ghost.dir = "up";
+            ghost.nextDir = "up";
+          }
+          return;
+        }
+        ghost.nextDir = chooseGhostDir(ghost);
+        moveUnit(ghost);
+        if (ghost.frightened > 0) ghost.frightened -= 1;
+      });
+    }
+
+    function resetAfterHit() {
+      pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
+      ghosts.forEach((ghost, index) => {
+        const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
+        ghost.x = homeSpots[index].x;
+        ghost.y = homeSpots[index].y;
+        ghost.dir = ["left", "up", "down", "right"][index];
+        ghost.nextDir = ghost.dir;
+        ghost.frightened = 0;
+        ghost.eaten = 0;
+      });
+      gameState = "ready";
+      stateUntil = performance.now() + 1100;
+      lastPlayerMove = 0;
+      lastGhostMove = 0;
+    }
+
+    function collide() {
+      ghosts.forEach((ghost) => {
+        if (ghost.eaten > 0 || ghost.x !== pacman.x || ghost.y !== pacman.y) return;
+        if (ghost.frightened > 0) {
+          ghost.eaten = 9;
+          ghost.frightened = 0;
+          award(200, ghost.x, ghost.y, "+200");
+          beep(560, 0.08, "triangle", 0.05);
+          return;
+        }
+
+        lives -= 1;
+        updateHud();
+        beep(110, 0.16, "sawtooth", 0.055);
+        if (lives <= 0) {
+          gameState = "gameOver";
+          stateUntil = 0;
+        } else {
+          resetAfterHit();
+        }
+      });
+    }
+
+    function setDirection(dirName) {
+      if (!dirs[dirName]) return;
+      startAudio();
+      if (gameState === "title" || gameState === "gameOver") {
+        newGame();
+      }
+      if (gameState !== "playing" && gameState !== "ready") return;
+      pacman.nextDir = dirName;
+      if (gameState === "playing" && canMove(pacman, dirName)) {
+        pacman.dir = dirName;
+        lastPlayerMove = performance.now() - playerDelay();
+      }
+    }
+
+    function togglePause() {
+      if (gameState === "playing") {
+        gameState = "paused";
+      } else if (gameState === "paused") {
+        gameState = "playing";
+        lastPlayerMove = performance.now();
+        lastGhostMove = performance.now();
+      }
+      draw();
+    }
+
+    function drawMaze() {
+      ctx.fillStyle = "#00020a";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let y = 0; y < rows; y += 1) {
+        for (let x = 0; x < cols; x += 1) {
+          if (!isWall(x, y)) continue;
+          const px = x * tile;
+          const py = y * tile;
+          const glow = ctx.createLinearGradient(px, py, px + tile, py + tile);
+          glow.addColorStop(0, "#1b2dbd");
+          glow.addColorStop(0.5, "#3158ff");
+          glow.addColorStop(1, "#151b84");
+          ctx.fillStyle = glow;
+          ctx.fillRect(px + 1, py + 1, tile - 2, tile - 2);
+          ctx.strokeStyle = "rgba(94, 183, 255, 0.7)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(px + 3, py + 3, tile - 6, tile - 6);
+        }
+      }
+    }
+
+    function drawDots(now) {
+      ctx.fillStyle = "#fff6b3";
+      pellets.forEach((dot) => {
+        const [x, y] = dot.split(",").map(Number);
+        ctx.beginPath();
+        ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      const pulse = 1 + Math.sin(now / 120) * 0.18;
+      ctx.fillStyle = "#fff3a0";
+      powers.forEach((dot) => {
+        const [x, y] = dot.split(",").map(Number);
+        ctx.beginPath();
+        ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 6 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawPacman(now) {
+      const cx = pacman.x * tile + tile / 2;
+      const cy = pacman.y * tile + tile / 2;
+      const mouth = Math.sin(now / 70) * 0.18 + 0.32;
+      const angle = dirs[pacman.dir].angle;
+      ctx.fillStyle = "#ffed4a";
+      ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, tile * 0.42, angle + mouth, angle + Math.PI * 2 - mouth);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    function drawGhost(ghost, now) {
+      if (ghost.eaten > 0) return;
+      const px = ghost.x * tile;
+      const py = ghost.y * tile;
+      const wobble = Math.sin(now / 110 + ghost.x) * 1.5;
+      const body = ghost.frightened > 0 ? (ghost.frightened < 10 && Math.floor(now / 120) % 2 ? "#fff" : "#243fff") : ghost.color;
+
+      ctx.fillStyle = body;
+      ctx.shadowColor = body;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(px + tile / 2, py + tile * 0.42 + wobble, tile * 0.36, Math.PI, 0);
+      ctx.lineTo(px + tile * 0.86, py + tile * 0.84);
+      ctx.lineTo(px + tile * 0.68, py + tile * 0.72);
+      ctx.lineTo(px + tile * 0.5, py + tile * 0.84);
+      ctx.lineTo(px + tile * 0.32, py + tile * 0.72);
+      ctx.lineTo(px + tile * 0.14, py + tile * 0.84);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      const look = dirs[ghost.dir];
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(px + tile * 0.37, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
+      ctx.arc(px + tile * 0.63, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#081238";
+      ctx.beginPath();
+      ctx.arc(px + tile * 0.37 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
+      ctx.arc(px + tile * 0.63 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawFloaters(now) {
+      floaters = floaters.filter((item) => now - item.born < item.ttl);
+      ctx.textAlign = "center";
+      ctx.font = "bold 12px Consolas, Monaco, monospace";
+      floaters.forEach((item) => {
+        const t = (now - item.born) / item.ttl;
+        ctx.globalAlpha = 1 - t;
+        ctx.fillStyle = item.color;
+        ctx.fillText(item.text, item.x * tile + tile / 2, item.y * tile + tile / 2 - t * 22);
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawLives() {
+      for (let i = 0; i < lives; i += 1) {
+        const cx = 14 + i * 18;
+        const cy = canvas.height - 9;
+        ctx.fillStyle = "#ffed4a";
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, 7, 0.35, Math.PI * 2 - 0.35);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    function overlay(title, subtitle) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffed4a";
+      ctx.textAlign = "center";
+      ctx.font = "bold 36px Consolas, Monaco, monospace";
+      ctx.shadowColor = "rgba(255, 237, 74, 0.8)";
+      ctx.shadowBlur = 16;
+      ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 16);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#f6f7ff";
+      ctx.font = "16px Consolas, Monaco, monospace";
+      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
+    }
+
+    function draw(now = performance.now()) {
+      drawMaze();
+      drawDots(now);
+      if (pacman) drawPacman(now);
+      ghosts.forEach((ghost) => drawGhost(ghost, now));
+      drawFloaters(now);
+      drawLives();
+
+      if (gameState === "title") overlay("PACMAN", "Entrée, Espace ou Jouer pour commencer");
+      if (gameState === "ready") overlay("READY!", "Prépare ton virage");
+      if (gameState === "paused") overlay("PAUSE", "P pour reprendre");
+      if (gameState === "levelClear") overlay("NIVEAU TERMINE", "Niveau suivant...");
+      if (gameState === "gameOver") overlay("GAME OVER", "Entrée, Espace ou Jouer pour recommencer");
+    }
+
+    function update(now) {
+      if (gameState === "ready" && now >= stateUntil) {
+        gameState = "playing";
+        lastPlayerMove = now;
+        lastGhostMove = now;
+      }
+
+      if (gameState === "levelClear" && now >= stateUntil) {
+        nextLevel();
+      }
+
+      if (gameState === "playing" && now - lastPlayerMove >= playerDelay()) {
+        moveUnit(pacman);
+        eatDots();
+        if (gameState === "playing") collide();
+        lastPlayerMove = now;
+      }
+
+      if (gameState === "playing" && now - lastGhostMove >= ghostDelay()) {
+        moveGhosts();
+        collide();
+        lastGhostMove = now;
+      }
+
+      draw(now);
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const map = {
+        ArrowUp: "up",
+        w: "up",
+        z: "up",
+        ArrowRight: "right",
+        d: "right",
+        ArrowDown: "down",
+        s: "down",
+        ArrowLeft: "left",
+        a: "left",
+        q: "left"
+      };
+      const dir = map[event.key] || map[event.key.toLowerCase()];
+      if (dir) {
+        event.preventDefault();
+        setDirection(dir);
+        return;
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        if (gameState === "title" || gameState === "gameOver") newGame();
+      }
+      if (event.key.toLowerCase() === "p") togglePause();
+      if (event.key.toLowerCase() === "r") newGame();
+    });
+
+    startBtn.addEventListener("click", newGame);
+    restartBtn.addEventListener("click", newGame);
+    pauseBtn.addEventListener("click", togglePause);
+    musicBtn.addEventListener("click", toggleMusic);
+    songBtn.addEventListener("click", () => {
+      window.open("https://www.youtube.com/watch?v=kJp3jISVNY0", "_blank", "noopener");
+    });
+    document.querySelectorAll("[data-dir]").forEach((button) => {
+      button.addEventListener("click", () => setDirection(button.dataset.dir));
+    });
+
+    buildLevel();
+    gameState = "title";
+    updateHud();
+    updateMusicButton();
+    requestAnimationFrame(update);
+  </script>
+</body>
+</html>
