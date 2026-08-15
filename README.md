@@ -15,3 +15,7 @@ Ouvrez simplement le fichier `index.html` dans un navigateur, ou activez GitHub 
 ## Technos
 
 - HTML / CSS / JavaScript (aucune librairie externe)
+
+## Special thanks
+
+✨ Un grand merci à [Freebuff](https://freebuff.com/), l'agent de code gratuit qui a aidé à créer ce jeu. 🚀 C'est gratuit, alors allez y jeter un œil : [freebuff.com](https://freebuff.com/)
