@@ -18,4 +18,4 @@ Ouvrez simplement le fichier `index.html` dans un navigateur, ou activez GitHub 
 
 ## Special thanks
 
-✨ Un grand merci à [Freebuff](https://freebuff.com/), l'agent de code gratuit qui a aidé à créer ce jeu. 🚀 C'est gratuit, alors allez y jeter un œil : [freebuff.com](https://freebuff.com/)
+✨ Un grand merci à [Freebuff](https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611), l'agent de code gratuit qui a aidé à créer ce jeu. 🚀 C'est gratuit, essayez-le ici !
