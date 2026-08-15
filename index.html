@@ -160,7 +160,7 @@
     }
 
     canvas {
-      width: min(100%, 504px);
+      max-width: min(100%, 600px);
       height: auto;
       display: block;
       background: #000;
@@ -618,34 +618,6 @@
     const welcomeMusic = document.getElementById("welcomeMusic");
     const welcomePlay = document.getElementById("welcomePlay");
 
-    const layout = [
-      "#####################",
-      "#.........#.........#",
-      "#.###.###.#.###.###.#",
-      "#o# #.#     #.# # #o#",
-      "#.###.#.#####.#.###.#",
-      "#...................#",
-      "#.###.#.#####.#.###.#",
-      "#.....#...#...#.....#",
-      "#####.### # ###.#####",
-      "    #.#       #.#    ",
-      "#####.# ## ## #.#####",
-      "     .  #   #  .     ",
-      "#####.# ##### #.#####",
-      "    #.#       #.#    ",
-      "#####.# ##### #.#####",
-      "#.........#.........#",
-      "#.###.###.#.###.###.#",
-      "#o..#.....P.....#..o#",
-      "###.#.#.#####.#.#.###",
-      "#.....#...#...#.....#",
-      "#.#######.#.#######.#",
-      "#...................#",
-      "#####################"
-    ];
-
-    const rows = layout.length;
-    const cols = layout[0].length;
     const tile = 24;
     const dirs = {
       up: { x: 0, y: -1, angle: Math.PI * 1.5 },
@@ -654,11 +626,131 @@
       left: { x: -1, y: 0, angle: Math.PI }
     };
     const opposite = { up: "down", down: "up", left: "right", right: "left" };
-    const ghostHome = { x: 10, y: 11 };
-    const pacStart = { x: 10, y: 17 };
     const dirNames = Object.keys(dirs);
-    const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
-    const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
+
+    const MAZES = [
+      {
+        layout: [
+          "#####################",
+          "#.........#.........#",
+          "#.###.###.#.###.###.#",
+          "#o# #.#     #.# # #o#",
+          "#.###.#.#####.#.###.#",
+          "#...................#",
+          "#.###.#.#####.#.###.#",
+          "#.....#...#...#.....#",
+          "#####.### # ###.#####",
+          "    #.#       #.#    ",
+          "#####.# ## ## #.#####",
+          "     .  #   #  .     ",
+          "#####.# ##### #.#####",
+          "    #.#       #.#    ",
+          "#####.# ##### #.#####",
+          "#.........#.........#",
+          "#.###.###.#.###.###.#",
+          "#o..#.....P.....#..o#",
+          "###.#.#.#####.#.#.###",
+          "#.....#...#...#.....#",
+          "#.#######.#.#######.#",
+          "#...................#",
+          "#####################"
+        ],
+        ghostHome: { x: 10, y: 11 },
+        homeSpots: [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }]
+      },
+      {
+        layout: [
+          "#########################",
+          "#...........#...........#",
+          "#.###.#####.#.#####.###.#",
+          "#o# #.#...#.#.#...#.# #o#",
+          "#.###.###.#.#.#.###.###.#",
+          "#.......#...#...#.......#",
+          "#.#####.#.#####.#.#####.#",
+          "#.#...#.#...#...#.#...#.#",
+          "#.#.#.#.#.## ##.#.#.#.#.#",
+          "    #.#.#       #.#.#    ",
+          "#####.#.#       #.#.#####",
+          "     .  #       #  .     ",
+          "#####.#.#       #.#.#####",
+          "    #.#.#       #.#.#    ",
+          "#####.#.#.#####.#.#.#####",
+          "#.#...#.#...#...#.#...#.#",
+          "#.#####.#.#####.#.#####.#",
+          "#.......#...#...#.......#",
+          "#.###.###.#.#.#.###.###.#",
+          "#o# #.#...#.P.#...#.# #o#",
+          "#.###.###.#.#.#.###.###.#",
+          "#.......#...#...#.......#",
+          "#.#####.#.#####.#.#####.#",
+          "#...........#...........#",
+          "#########################"
+        ],
+        ghostHome: { x: 12, y: 11 },
+        homeSpots: [{ x: 12, y: 9 }, { x: 11, y: 11 }, { x: 13, y: 11 }, { x: 12, y: 13 }]
+      },
+      {
+        layout: [
+          "#########################",
+          "#...........#...........#",
+          "#.###.#####.#.#####.###.#",
+          "#o# #.#...#.#.#...#.# #o#",
+          "#.###.###.#.#.#.###.###.#",
+          "#o# #.#...#.#.#...#.# #o#",
+          "#.###.###.#.#.#.###.###.#",
+          "#.......#...#...#.......#",
+          "#.#####.#.#####.#.#####.#",
+          "#.#...#.#...#...#.#...#.#",
+          "#.#.#.#.#.## ##.#.#.#.#.#",
+          "    #.#.#       #.#.#    ",
+          "#####.#.#       #.#.#####",
+          "     .  #       #  .     ",
+          "#####.#.#       #.#.#####",
+          "    #.#.#       #.#.#    ",
+          "#####.#.#.#####.#.#.#####",
+          "#.#...#.#...#...#.#...#.#",
+          "#.#####.#.#####.#.#####.#",
+          "#.......#...#...#.......#",
+          "#.###.###.#.#.#.###.###.#",
+          "#o# #.#...#.P.#...#.# #o#",
+          "#.###.###.#.#.#.###.###.#",
+          "#.......#...#...#.......#",
+          "#.#####.#.#####.#.#####.#",
+          "#...........#...........#",
+          "#########################"
+        ],
+        ghostHome: { x: 12, y: 13 },
+        homeSpots: [{ x: 12, y: 11 }, { x: 11, y: 13 }, { x: 13, y: 13 }, { x: 12, y: 15 }]
+      }
+    ];
+
+    let rows = 0;
+    let cols = 0;
+    let wallMap = [];
+    let ghostHome = { x: 0, y: 0 };
+    let pacStart = { x: 0, y: 0 };
+    let fruitSpot = { x: 0, y: 0 };
+    let homeSpots = [];
+
+    function findPacStart(layout) {
+      for (let y = 0; y < layout.length; y += 1) {
+        const x = layout[y].indexOf("P");
+        if (x !== -1) return { x, y };
+      }
+      return { x: 1, y: 1 };
+    }
+
+    function applyMaze(maze) {
+      rows = maze.layout.length;
+      cols = maze.layout[0].length;
+      wallMap = maze.layout.map((row) => [...row].map((cell) => cell === "#"));
+      ghostHome = maze.ghostHome;
+      pacStart = findPacStart(maze.layout);
+      fruitSpot = maze.ghostHome;
+      homeSpots = maze.homeSpots;
+    }
+
+    applyMaze(MAZES[0]);
     const fruits = [
       { fr: "Cerise", en: "Cherry", zh: "樱桃", points: 100, color: "#ff4f5e" },
       { fr: "Fraise", en: "Strawberry", zh: "草莓", points: 300, color: "#ff5f7a" },
@@ -1190,9 +1282,17 @@
     }
 
     function buildLevel() {
+      const maze = MAZES[(level - 1) % MAZES.length];
+      applyMaze(maze);
+      canvas.width = cols * tile;
+      canvas.height = rows * tile;
+      mazeCanvas.width = cols * tile;
+      mazeCanvas.height = rows * tile;
+      buildMazeCache();
+
       pellets = new Set();
       powers = new Set();
-      layout.forEach((row, y) => {
+      maze.layout.forEach((row, y) => {
         [...row].forEach((cell, x) => {
           if (cell === ".") pellets.add(key(x, y));
           if (cell === "o") powers.add(key(x, y));
@@ -1200,11 +1300,12 @@
       });
 
       pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
+      const ghostDirs = ["left", "up", "down", "right"];
       ghosts = [
-        actor(10, 9, "left", "#ff4f5e", "blinky"),
-        actor(9, 11, "up", "#4de7ff", "inky"),
-        actor(11, 11, "down", "#ff4fa3", "pinky"),
-        actor(10, 13, "right", "#ffad43", "clyde")
+        actor(homeSpots[0].x, homeSpots[0].y, ghostDirs[0], "#ff4f5e", "blinky"),
+        actor(homeSpots[1].x, homeSpots[1].y, ghostDirs[1], "#4de7ff", "inky"),
+        actor(homeSpots[2].x, homeSpots[2].y, ghostDirs[2], "#ff4fa3", "pinky"),
+        actor(homeSpots[3].x, homeSpots[3].y, ghostDirs[3], "#ffad43", "clyde")
       ];
       floaters = [];
       particles = [];
@@ -1770,8 +1871,8 @@
         if (!fruit && now >= nextFruitAt) {
           const fi = Math.min(level - 1, fruits.length - 1);
           fruit = {
-            x: 10,
-            y: 11,
+            x: fruitSpot.x,
+            y: fruitSpot.y,
             type: fi,
             points: fruits[fi].points,
             color: fruits[fi].color,
