@@ -93,6 +93,32 @@
       box-shadow: 0 0 16px rgba(255, 237, 74, 0.28);
     }
 
+    .icon-btn {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .icon-btn.active {
+      background: #2a2360;
+      border-color: var(--pink);
+      box-shadow: 0 0 18px rgba(255, 79, 163, 0.45);
+    }
+
+    .lang-btn {
+      min-height: 44px;
+      padding: 0 12px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      border-color: rgba(84, 168, 255, 0.55);
+      color: var(--blue-hot);
+      background: rgba(7, 10, 31, 0.9);
+    }
+
     .hud {
       width: min(100%, 620px);
       display: grid;
@@ -323,19 +349,20 @@
     <section class="marquee" aria-label="Commandes principales">
       <div class="brand">PACMAN ARCADE</div>
       <div class="actions">
-        <button id="startBtn" type="button">Jouer</button>
-        <button id="pauseBtn" type="button">Pause</button>
-        <button id="musicBtn" type="button">Musique</button>
-        <button id="restartBtn" type="button">Redémarrer</button>
+        <button id="startBtn" type="button" class="icon-btn" data-i18n-title="play" title="Jouer" aria-label="Jouer">▶️</button>
+        <button id="pauseBtn" type="button" class="icon-btn" data-i18n-title="pause" title="Pause" aria-label="Pause">⏸️</button>
+        <button id="musicBtn" type="button" class="icon-btn" data-i18n-title="music" title="Musique" aria-label="Musique">🎵</button>
+        <button id="restartBtn" type="button" class="icon-btn" data-i18n-title="restart" title="Redémarrer" aria-label="Redémarrer">🔄</button>
+        <button id="langBtn" type="button" class="lang-btn">🌐 FR</button>
       </div>
     </section>
 
     <section class="hud" aria-label="Tableau de score">
-      <div class="hud-item"><span>Score</span><strong id="score">0</strong></div>
-      <div class="hud-item"><span>Record</span><strong id="best">0</strong></div>
-      <div class="hud-item"><span>Niveau</span><strong id="level">1</strong></div>
-      <div class="hud-item"><span>Vies</span><strong id="lives">3</strong></div>
-      <div class="hud-item"><span>Restants</span><strong id="remaining">0</strong></div>
+      <div class="hud-item"><span data-i18n="score">Score</span><strong id="score">0</strong></div>
+      <div class="hud-item"><span data-i18n="best">Record</span><strong id="best">0</strong></div>
+      <div class="hud-item"><span data-i18n="level">Niveau</span><strong id="level">1</strong></div>
+      <div class="hud-item"><span data-i18n="lives">Vies</span><strong id="lives">3</strong></div>
+      <div class="hud-item"><span data-i18n="remaining">Restants</span><strong id="remaining">0</strong></div>
     </section>
 
     <section class="game-shell">
@@ -344,18 +371,18 @@
 
     <section class="yt-wrap" id="ytWrap" aria-label="Lecteur musique" hidden>
       <div class="yt-bar">
-        <span>🎵 Musique 1984</span>
-        <button id="ytClose" type="button">Fermer</button>
+        <span data-i18n="music1984">Musique 1984</span>
+        <button id="ytClose" type="button" data-i18n="close">Fermer</button>
       </div>
       <div class="yt-player"><div id="ytPlayer"></div></div>
     </section>
 
-    <p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
+    <p class="help" data-i18n="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
 
     <section class="board" aria-label="Classement">
       <div class="player-box">
-        <label for="nameInput">Pseudo</label>
-        <input id="nameInput" type="text" maxlength="14" placeholder="Ton pseudo..." autocomplete="off" />
+        <label for="nameInput" data-i18n="pseudo">Pseudo</label>
+        <input id="nameInput" type="text" maxlength="14" data-i18n-placeholder="pseudoPlaceholder" placeholder="Ton pseudo..." autocomplete="off" />
       </div>
       <p id="nameHint" class="name-hint"></p>
       <div class="board-title" id="boardTitle">TOP 5 LOCAL</div>
@@ -364,11 +391,11 @@
 
     <section class="touch-pad" aria-label="Contrôles tactiles">
       <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="up" type="button">Haut</button>
+      <button data-dir="up" type="button" data-i18n="up">Haut</button>
       <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="left" type="button">Gauche</button>
-      <button data-dir="down" type="button">Bas</button>
-      <button data-dir="right" type="button">Droite</button>
+      <button data-dir="left" type="button" data-i18n="left">Gauche</button>
+      <button data-dir="down" type="button" data-i18n="down">Bas</button>
+      <button data-dir="right" type="button" data-i18n="right">Droite</button>
     </section>
   </main>
 
@@ -390,6 +417,7 @@
     const nameHint = document.getElementById("nameHint");
     const boardList = document.getElementById("boardList");
     const boardTitle = document.getElementById("boardTitle");
+    const langBtn = document.getElementById("langBtn");
 
     const layout = [
       "#####################",
@@ -433,15 +461,124 @@
     const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
     const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
     const fruits = [
-      { name: "Cerise", points: 100, color: "#ff4f5e" },
-      { name: "Fraise", points: 300, color: "#ff5f7a" },
-      { name: "Orange", points: 500, color: "#ffad43" },
-      { name: "Pomme", points: 700, color: "#7dff5e" },
-      { name: "Melon", points: 1000, color: "#8dff9e" },
-      { name: "Galaxian", points: 2000, color: "#4de7ff" },
-      { name: "Cloche", points: 3000, color: "#ffed4a" },
-      { name: "Clé", points: 5000, color: "#f6f7ff" }
+      { fr: "Cerise", en: "Cherry", points: 100, color: "#ff4f5e" },
+      { fr: "Fraise", en: "Strawberry", points: 300, color: "#ff5f7a" },
+      { fr: "Orange", en: "Orange", points: 500, color: "#ffad43" },
+      { fr: "Pomme", en: "Apple", points: 700, color: "#7dff5e" },
+      { fr: "Melon", en: "Melon", points: 1000, color: "#8dff9e" },
+      { fr: "Galaxian", en: "Galaxian", points: 2000, color: "#4de7ff" },
+      { fr: "Cloche", en: "Bell", points: 3000, color: "#ffed4a" },
+      { fr: "Clé", en: "Key", points: 5000, color: "#f6f7ff" }
     ];
+
+    const I18N = {
+      fr: {
+        play: "Jouer",
+        pause: "Pause",
+        music: "Musique",
+        musicOn: "Musique ON",
+        restart: "Redémarrer",
+        switchLang: "Changer de langue",
+        score: "Score",
+        best: "Record",
+        level: "Niveau",
+        lives: "Vies",
+        remaining: "Restants",
+        help: "Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.",
+        pseudo: "Pseudo",
+        pseudoPlaceholder: "Ton pseudo...",
+        top5: "TOP 5",
+        world: "MONDIAL",
+        local: "LOCAL",
+        noScores: "Aucun score pour l'instant",
+        enterName: "Entre un pseudo pour jouer !",
+        music1984: "Musique 1984",
+        close: "Fermer",
+        up: "Haut",
+        down: "Bas",
+        left: "Gauche",
+        right: "Droite",
+        titleSub: "Record {n} — Entrée, Espace ou Jouer",
+        ready: "READY!",
+        readySub: "Prépare ton virage",
+        paused: "PAUSE",
+        pausedSub: "P pour reprendre",
+        levelClear: "NIVEAU TERMINE",
+        levelClearSub: "Niveau suivant...",
+        gameOver: "GAME OVER",
+        gameOverSub: "Entrée, Espace ou Jouer pour recommencer",
+        power: "+{n} POWER",
+        life: "+1 VIE"
+      },
+      en: {
+        play: "Play",
+        pause: "Pause",
+        music: "Music",
+        musicOn: "Music ON",
+        restart: "Restart",
+        switchLang: "Switch language",
+        score: "Score",
+        best: "Best",
+        level: "Level",
+        lives: "Lives",
+        remaining: "Left",
+        help: "Arrows, WASD or ZQSD to move. Enter/Space to play, P to pause, R to restart.",
+        pseudo: "Nickname",
+        pseudoPlaceholder: "Your nickname...",
+        top5: "TOP 5",
+        world: "GLOBAL",
+        local: "LOCAL",
+        noScores: "No scores yet",
+        enterName: "Enter a nickname to play!",
+        music1984: "1984 Music",
+        close: "Close",
+        up: "Up",
+        down: "Down",
+        left: "Left",
+        right: "Right",
+        titleSub: "Best {n} — Enter, Space or Play",
+        ready: "READY!",
+        readySub: "Get ready",
+        paused: "PAUSED",
+        pausedSub: "Press P to resume",
+        levelClear: "LEVEL CLEAR",
+        levelClearSub: "Next level...",
+        gameOver: "GAME OVER",
+        gameOverSub: "Enter, Space or Play to restart",
+        power: "+{n} POWER",
+        life: "+1 LIFE"
+      }
+    };
+
+    function t(key, vars) {
+      let text = (I18N[lang] && I18N[lang][key]) ?? I18N.fr[key] ?? key;
+      if (vars) {
+        for (const name of Object.keys(vars)) {
+          text = text.replace(`{${name}}`, String(vars[name]));
+        }
+      }
+      return text;
+    }
+
+    function applyLang() {
+      document.querySelectorAll("[data-i18n]").forEach((el) => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        el.placeholder = t(el.dataset.i18nPlaceholder);
+      });
+      document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+        const label = t(el.dataset.i18nTitle);
+        el.title = label;
+        el.setAttribute("aria-label", label);
+      });
+      langBtn.textContent = "🌐 " + lang.toUpperCase();
+      langBtn.title = t("switchLang");
+      langBtn.setAttribute("aria-label", t("switchLang"));
+      nameHint.textContent = "";
+      updateMusicButton();
+      renderBoard(currentBoard, boardMode);
+    }
 
     canvas.width = cols * tile;
     canvas.height = rows * tile;
@@ -472,6 +609,9 @@
     let score = 0;
     let best = Number(loadStorage("pacmanBest", "0"));
     let playerName = loadStorage("pacmanName", "");
+    let lang = loadStorage("pacmanLang", "fr");
+    let currentBoard = [];
+    let boardMode = "local";
     let level = 1;
     let lives = 3;
     let gameState = "title";
@@ -639,7 +779,10 @@
     }
 
     function updateMusicButton() {
-      musicBtn.textContent = ytOpen ? "Musique ON" : "Musique";
+      musicBtn.classList.toggle("active", ytOpen);
+      const label = t(ytOpen ? "musicOn" : "music");
+      musicBtn.title = label;
+      musicBtn.setAttribute("aria-label", label);
     }
 
     function award(points, x, y, label) {
@@ -662,7 +805,7 @@
         floaters.push({
           x,
           y,
-          text: "+1 VIE",
+          text: t("life"),
           born: performance.now(),
           ttl: 1300,
           color: "#ff4fa3"
@@ -744,18 +887,20 @@
       }
     }
 
-    function renderBoard(entries, title) {
-      boardTitle.textContent = title;
+    function renderBoard(entries, mode) {
+      currentBoard = entries || [];
+      boardMode = mode || "local";
+      boardTitle.textContent = `${t("top5")} ${t(boardMode === "world" ? "world" : "local")}`;
       boardList.innerHTML = "";
-      if (!entries || entries.length === 0) {
+      if (currentBoard.length === 0) {
         const li = document.createElement("li");
-        li.textContent = "Aucun score pour l'instant";
+        li.textContent = t("noScores");
         li.className = "board-empty";
         boardList.appendChild(li);
         return;
       }
-      const ranks = ["1er", "2e", "3e", "4e", "5e"];
-      entries.slice(0, 5).forEach((entry, index) => {
+      const ranks = ["1.", "2.", "3.", "4.", "5."];
+      currentBoard.slice(0, 5).forEach((entry, index) => {
         const li = document.createElement("li");
         const nameSpan = document.createElement("span");
         nameSpan.textContent = `${ranks[index]} ${entry.name}`;
@@ -806,9 +951,9 @@
     async function refreshBoard() {
       const online = await fetchOnlineBoard();
       if (online) {
-        renderBoard(online, "TOP 5 MONDIAL");
+        renderBoard(online, "world");
       } else {
-        renderBoard(loadBoard(), "TOP 5 LOCAL");
+        renderBoard(loadBoard(), "local");
       }
     }
 
@@ -823,7 +968,7 @@
       saveStorage("pacmanBoard", JSON.stringify(board.slice(0, 5)));
       const ok = await postScore(name, finalScore, finalLevel);
       if (!ok) {
-        renderBoard(loadBoard(), "TOP 5 LOCAL");
+        renderBoard(loadBoard(), "local");
         return;
       }
       await refreshBoard();
@@ -833,7 +978,7 @@
       const name = nameInput.value.trim() || playerName;
       if (!name) {
         nameInput.focus();
-        nameHint.textContent = "Entre un pseudo pour jouer !";
+        nameHint.textContent = t("enterName");
         return;
       }
       playerName = name.slice(0, 14);
@@ -870,7 +1015,7 @@
         playPelletSound();
       }
       if (powers.delete(dotKey)) {
-        award(50, pacman.x, pacman.y, "+50 POWER");
+        award(50, pacman.x, pacman.y, t("power", { n: 50 }));
         ghosts.forEach((ghost) => {
           ghost.frightened = 34 + level * 2;
         });
@@ -878,7 +1023,7 @@
         playPowerSound();
       }
       if (fruit && pacman.x === fruit.x && pacman.y === fruit.y) {
-        award(fruit.points, fruit.x, fruit.y, `${fruits[fruit.type].name.toUpperCase()} +${fruit.points}`);
+        award(fruit.points, fruit.x, fruit.y, `${fruits[fruit.type][lang].toUpperCase()} +${fruit.points}`);
         spawnParticles(fruit.x, fruit.y, fruit.color, 22);
         playFruitSound();
         fruit = null;
@@ -887,7 +1032,7 @@
       if (remainingDots() === 0 && gameState === "playing") {
         gameState = "levelClear";
         stateUntil = performance.now() + 1900;
-        award(500, pacman.x, pacman.y, "NIVEAU TERMINE");
+        award(500, pacman.x, pacman.y, t("levelClear"));
         playLevelClearSound();
       }
     }
@@ -1218,11 +1363,11 @@
       drawFloaters(now);
       drawLives();
 
-      if (gameState === "title") overlay("PACMAN", `Record ${best} — Entrée, Espace ou Jouer`);
-      if (gameState === "ready") overlay("READY!", "Prépare ton virage");
-      if (gameState === "paused") overlay("PAUSE", "P pour reprendre");
-      if (gameState === "levelClear") overlay("NIVEAU TERMINE", "Niveau suivant...");
-      if (gameState === "gameOver") overlay("GAME OVER", "Entrée, Espace ou Jouer pour recommencer");
+      if (gameState === "title") overlay("PACMAN", t("titleSub", { n: best }));
+      if (gameState === "ready") overlay(t("ready"), t("readySub"));
+      if (gameState === "paused") overlay(t("paused"), t("pausedSub"));
+      if (gameState === "levelClear") overlay(t("levelClear"), t("levelClearSub"));
+      if (gameState === "gameOver") overlay(t("gameOver"), t("gameOverSub"));
     }
 
     function update(now) {
@@ -1386,6 +1531,12 @@
       button.addEventListener("click", () => setDirection(button.dataset.dir));
     });
 
+    langBtn.addEventListener("click", () => {
+      lang = lang === "fr" ? "en" : "fr";
+      saveStorage("pacmanLang", lang);
+      applyLang();
+    });
+
     nameInput.value = playerName;
     nameInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
@@ -1393,7 +1544,9 @@
         startGame();
       }
     });
-    renderBoard(loadBoard(), "TOP 5 LOCAL");
+    currentBoard = loadBoard();
+    boardMode = "local";
+    applyLang();
     refreshBoard();
 
     buildMazeCache();
