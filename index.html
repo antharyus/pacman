@@ -287,6 +287,16 @@
     const dirNames = Object.keys(dirs);
     const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
     const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
+    const fruits = [
+      { name: "Cerise", points: 100, color: "#ff4f5e" },
+      { name: "Fraise", points: 300, color: "#ff5f7a" },
+      { name: "Orange", points: 500, color: "#ffad43" },
+      { name: "Pomme", points: 700, color: "#7dff5e" },
+      { name: "Melon", points: 1000, color: "#8dff9e" },
+      { name: "Galaxian", points: 2000, color: "#4de7ff" },
+      { name: "Cloche", points: 3000, color: "#ffed4a" },
+      { name: "Clé", points: 5000, color: "#f6f7ff" }
+    ];
 
     canvas.width = cols * tile;
     canvas.height = rows * tile;
@@ -311,10 +321,15 @@
     let lastGhostMove = 0;
     let audioCtx;
     let musicTimer;
-    let musicEnabled = false;
+    let musicEnabled = localStorage.getItem("pacmanMusic") === "1";
     let musicStep = 0;
     let pelletStep = 0;
     let lastBumpSound = 0;
+    let dyingUntil = 0;
+    let fruit = null;
+    let nextFruitAt = 0;
+    let nextLifeAt = 10000;
+    let particles = [];
 
     function actor(x, y, dir, color, name) {
       return { x, y, dir, nextDir: dir, color, name, frightened: 0, eaten: 0 };
@@ -420,6 +435,18 @@
       noise(0.16, 0.018, 0.02);
     }
 
+    function playFruitSound() {
+      [440, 554, 659, 880].forEach((freq, index) => {
+        beep(freq, 0.06, "triangle", 0.03, index * 0.05, freq * 1.06);
+      });
+    }
+
+    function playExtraLifeSound() {
+      [523, 659, 784, 1046, 1318, 1568].forEach((freq, index) => {
+        beep(freq, 0.09, "triangle", 0.035, index * 0.07);
+      });
+    }
+
     function playGhostEatSound() {
       beep(880, 0.08, "triangle", 0.045, 0, 1320);
       beep(1760, 0.06, "square", 0.026, 0.075, 1200);
@@ -468,6 +495,7 @@
     function toggleMusic() {
       startAudio();
       musicEnabled = !musicEnabled;
+      localStorage.setItem("pacmanMusic", musicEnabled ? "1" : "0");
       if (musicEnabled && !musicTimer) {
         musicTimer = setInterval(playMusicStep, 155);
       }
@@ -492,6 +520,19 @@
         ttl: 780,
         color: points >= 200 ? "#4de7ff" : "#fff6b3"
       });
+      if (score >= nextLifeAt) {
+        lives += 1;
+        nextLifeAt += 10000;
+        floaters.push({
+          x,
+          y,
+          text: "+1 VIE",
+          born: performance.now(),
+          ttl: 1300,
+          color: "#ff4fa3"
+        });
+        playExtraLifeSound();
+      }
       updateHud();
     }
 
@@ -513,6 +554,9 @@
         actor(10, 13, "right", "#ffad43", "clyde")
       ];
       floaters = [];
+      particles = [];
+      fruit = null;
+      nextFruitAt = performance.now() + 8000;
       lastPlayerMove = 0;
       lastGhostMove = 0;
       gameState = "ready";
@@ -548,6 +592,7 @@
       level = 1;
       lives = 3;
       pelletStep = 0;
+      nextLifeAt = 10000;
       buildLevel();
       playStartSound();
     }
@@ -583,7 +628,15 @@
         ghosts.forEach((ghost) => {
           ghost.frightened = 34 + level * 2;
         });
+        spawnParticles(pacman.x, pacman.y, "#fff3a0", 20);
         playPowerSound();
+      }
+      if (fruit && pacman.x === fruit.x && pacman.y === fruit.y) {
+        award(fruit.points, fruit.x, fruit.y, `${fruits[fruit.type].name.toUpperCase()} +${fruit.points}`);
+        spawnParticles(fruit.x, fruit.y, fruit.color, 22);
+        playFruitSound();
+        fruit = null;
+        nextFruitAt = performance.now() + 9000;
       }
       if (remainingDots() === 0 && gameState === "playing") {
         gameState = "levelClear";
@@ -661,6 +714,7 @@
           ghost.eaten = 9;
           ghost.frightened = 0;
           award(200, ghost.x, ghost.y, "+200");
+          spawnParticles(ghost.x, ghost.y, "#4de7ff", 18);
           playGhostEatSound();
           return;
         }
@@ -668,12 +722,8 @@
         lives -= 1;
         updateHud();
         playDeathSound();
-        if (lives <= 0) {
-          gameState = "gameOver";
-          stateUntil = 0;
-        } else {
-          resetAfterHit();
-        }
+        gameState = "dying";
+        dyingUntil = performance.now() + 1400;
       });
     }
 
@@ -734,6 +784,22 @@
     function drawPacman(now) {
       const cx = pacman.x * tile + tile / 2;
       const cy = pacman.y * tile + tile / 2;
+
+      if (gameState === "dying") {
+        const t = Math.min(1, (now - (dyingUntil - 1400)) / 1400);
+        const radius = tile * 0.42 * (1 - t * t);
+        if (radius > 0.5) {
+          ctx.fillStyle = "#ffed4a";
+          ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
+          ctx.shadowBlur = 14;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        return;
+      }
+
       const mouth = Math.sin(now / 70) * 0.18 + 0.32;
       const angle = dirs[pacman.dir].angle;
       ctx.fillStyle = "#ffed4a";
@@ -795,6 +861,79 @@
       ctx.globalAlpha = 1;
     }
 
+    function spawnParticles(px, py, color, count = 16) {
+      const cx = px * tile + tile / 2;
+      const cy = py * tile + tile / 2;
+      for (let i = 0; i < count; i += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 0.8 + Math.random() * 2.6;
+        particles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 0.8,
+          life: 0,
+          ttl: 420 + Math.random() * 300
+        });
+      }
+      if (particles.length > 260) particles.splice(0, particles.length - 260);
+    }
+
+    function updateParticles() {
+      particles = particles.filter((p) => p.life < p.ttl);
+      for (const p of particles) {
+        p.life += 16.67;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.94;
+        p.vy = p.vy * 0.94 + 0.12;
+      }
+    }
+
+    function drawParticles() {
+      for (const p of particles) {
+        const t = p.life / p.ttl;
+        ctx.globalAlpha = Math.max(0, 1 - t);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.5 + 2.4 * (1 - t), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawFruit(now) {
+      if (!fruit) return;
+      if (now > fruit.expires) {
+        fruit = null;
+        nextFruitAt = now + 8000;
+        return;
+      }
+      if (fruit.expires - now < 2500 && Math.floor(now / 140) % 2) return;
+      const px = fruit.x * tile + tile / 2;
+      const py = fruit.y * tile + tile / 2;
+      const pulse = 1 + Math.sin(now / 150) * 0.12;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.scale(pulse, pulse);
+      ctx.fillStyle = fruit.color;
+      ctx.shadowColor = fruit.color;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(0, -2, tile * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#7dff8a";
+      ctx.beginPath();
+      ctx.ellipse(0, -tile * 0.38, 2.5, 6, 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.textAlign = "center";
+      ctx.font = "bold 10px Consolas, Monaco, monospace";
+      ctx.fillStyle = "#f6f7ff";
+      ctx.fillText(String(fruit.points), px, py + tile * 0.6);
+    }
+
     function drawLives() {
       for (let i = 0; i < lives; i += 1) {
         const cx = 14 + i * 18;
@@ -826,12 +965,14 @@
     function draw(now = performance.now()) {
       drawMaze();
       drawDots(now);
+      drawFruit(now);
       if (pacman) drawPacman(now);
       ghosts.forEach((ghost) => drawGhost(ghost, now));
+      drawParticles();
       drawFloaters(now);
       drawLives();
 
-      if (gameState === "title") overlay("PACMAN", "Entrée, Espace ou Jouer pour commencer");
+      if (gameState === "title") overlay("PACMAN", `Record ${best} — Entrée, Espace ou Jouer`);
       if (gameState === "ready") overlay("READY!", "Prépare ton virage");
       if (gameState === "paused") overlay("PAUSE", "P pour reprendre");
       if (gameState === "levelClear") overlay("NIVEAU TERMINE", "Niveau suivant...");
@@ -839,14 +980,40 @@
     }
 
     function update(now) {
+      updateParticles();
+
       if (gameState === "ready" && now >= stateUntil) {
         gameState = "playing";
         lastPlayerMove = now;
         lastGhostMove = now;
       }
 
+      if (gameState === "dying" && now >= dyingUntil) {
+        if (lives <= 0) {
+          gameState = "gameOver";
+        } else {
+          resetAfterHit();
+        }
+      }
+
       if (gameState === "levelClear" && now >= stateUntil) {
         nextLevel();
+      }
+
+      if (gameState === "playing") {
+        if (!fruit && now >= nextFruitAt) {
+          const fi = Math.min(level - 1, fruits.length - 1);
+          fruit = {
+            x: 10,
+            y: 11,
+            type: fi,
+            points: fruits[fi].points,
+            color: fruits[fi].color,
+            born: now,
+            expires: now + 9000
+          };
+          playFruitSound();
+        }
       }
 
       if (gameState === "playing" && now - lastPlayerMove >= playerDelay()) {
@@ -893,6 +1060,15 @@
       if (event.key.toLowerCase() === "r") newGame();
     });
 
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && gameState === "playing") {
+        gameState = "paused";
+        lastPlayerMove = performance.now();
+        lastGhostMove = performance.now();
+        draw();
+      }
+    });
+
     startBtn.addEventListener("click", newGame);
     restartBtn.addEventListener("click", newGame);
     pauseBtn.addEventListener("click", togglePause);
@@ -909,6 +1085,7 @@
     gameState = "title";
     updateHud();
     updateMusicButton();
+    if (musicEnabled) musicTimer = setInterval(playMusicStep, 155);
     requestAnimationFrame(update);
   </script>
 </body>
