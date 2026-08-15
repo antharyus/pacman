@@ -456,6 +456,15 @@
       letter-spacing: 0.08em;
     }
 
+    .privacy-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: center;
+      opacity: 0.85;
+    }
+
     .footer {
       width: min(100%, 620px);
       display: grid;
@@ -539,6 +548,7 @@
         </div>
         <button id="welcomeMusic" type="button" class="music-option">🎵 Musique : OFF</button>
         <button id="welcomePlay" type="button" class="play-big" data-i18n="play">Jouer</button>
+        <p class="privacy-note" data-i18n="privacy">Ton pseudo et ton score sont enregistrés pour le classement mondial.</p>
       </div>
     </div>
   </section>
@@ -781,6 +791,7 @@
     const I18N = {
       fr: {
         play: "Jouer",
+        privacy: "Ton pseudo et ton score sont enregistrés pour le classement mondial.",
         pause: "Pause",
         music: "Musique",
         musicOn: "Musique ON",
@@ -828,6 +839,7 @@
       },
       en: {
         play: "Play",
+        privacy: "Your nickname and score are saved for the world leaderboard.",
         pause: "Pause",
         music: "Music",
         musicOn: "Music ON",
@@ -875,6 +887,7 @@
       },
       zh: {
         play: "开始",
+        privacy: "你的昵称和分数会被保存到全球排行榜。",
         pause: "暂停",
         music: "音乐",
         musicOn: "音乐开",
