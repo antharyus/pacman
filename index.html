@@ -316,6 +316,132 @@
       justify-content: center;
     }
 
+    .welcome {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(36, 70, 255, 0.25), transparent 30rem),
+        var(--bg);
+    }
+
+    .welcome[hidden] {
+      display: none;
+    }
+
+    .welcome-card {
+      width: min(94vw, 520px);
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      padding: 22px;
+      border: 1px solid rgba(84, 168, 255, 0.55);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(13, 18, 56, 0.97), rgba(7, 10, 31, 0.97));
+      box-shadow: 0 0 40px rgba(36, 70, 255, 0.35);
+    }
+
+    .welcome-brand {
+      color: var(--yellow);
+      font-size: clamp(22px, 7vw, 34px);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 16px rgba(255, 237, 74, 0.6);
+    }
+
+    .intro-canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      background: #02030b;
+    }
+
+    .skip-btn {
+      min-height: 34px;
+      padding: 6px 14px;
+      font-size: 13px;
+      border-color: rgba(84, 168, 255, 0.45);
+      color: var(--muted);
+    }
+
+    .welcome-panel {
+      width: 100%;
+      display: grid;
+      gap: 12px;
+    }
+
+    .welcome-panel[hidden] {
+      display: none;
+    }
+
+    .welcome-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .welcome-field label,
+    .welcome-label {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      min-width: 84px;
+    }
+
+    .welcome-field input {
+      flex: 1;
+      min-width: 0;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid rgba(84, 168, 255, 0.55);
+      border-radius: 6px;
+      background: rgba(2, 3, 11, 0.8);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .welcome-field input:focus {
+      outline: none;
+      border-color: var(--yellow);
+      box-shadow: 0 0 14px rgba(255, 237, 74, 0.25);
+    }
+
+    .lang-options {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+    }
+
+    .lang-option {
+      flex: 1;
+      min-height: 38px;
+      padding: 0;
+      font-size: 15px;
+    }
+
+    .lang-option.active,
+    .music-option.active {
+      background: #2a2360;
+      border-color: var(--pink);
+      box-shadow: 0 0 14px rgba(255, 79, 163, 0.4);
+    }
+
+    .music-option {
+      min-height: 38px;
+      padding: 8px 12px;
+    }
+
+    .play-big {
+      width: 100%;
+      min-height: 48px;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+    }
+
     @media (max-width: 620px) {
       main {
         padding: 10px;
@@ -342,9 +468,33 @@
         display: grid;
       }
     }
-  </style>
-</head>
+  </style>  </head>
 <body>
+  <section id="welcome" class="welcome" aria-label="Bienvenue">
+    <div class="welcome-card">
+      <div class="welcome-brand">PACMAN ARCADE</div>
+      <canvas id="intro" width="480" height="140" class="intro-canvas" aria-hidden="true"></canvas>
+      <button id="introSkip" type="button" class="skip-btn" data-i18n="skip">Passer l'animation</button>
+      <div id="welcomePanel" class="welcome-panel" hidden>
+        <div class="welcome-field">
+          <label for="welcomeName" data-i18n="pseudo">Pseudo</label>
+          <input id="welcomeName" type="text" maxlength="14" data-i18n-placeholder="pseudoPlaceholder" placeholder="Ton pseudo..." autocomplete="off" />
+        </div>
+        <p id="welcomeHint" class="name-hint"></p>
+        <div class="welcome-field">
+          <span class="welcome-label" data-i18n="language">Langue</span>
+          <div class="lang-options">
+            <button type="button" class="lang-option" data-lang="fr">FR</button>
+            <button type="button" class="lang-option" data-lang="en">EN</button>
+            <button type="button" class="lang-option" data-lang="zh">中</button>
+          </div>
+        </div>
+        <button id="welcomeMusic" type="button" class="music-option">🎵 Musique : OFF</button>
+        <button id="welcomePlay" type="button" class="play-big" data-i18n="play">Jouer</button>
+      </div>
+    </div>
+  </section>
+
   <main>
     <section class="marquee" aria-label="Commandes principales">
       <div class="brand">PACMAN ARCADE</div>
@@ -418,6 +568,15 @@
     const boardList = document.getElementById("boardList");
     const boardTitle = document.getElementById("boardTitle");
     const langBtn = document.getElementById("langBtn");
+    const welcomeEl = document.getElementById("welcome");
+    const introCanvas = document.getElementById("intro");
+    const introCtx = introCanvas.getContext("2d");
+    const introSkip = document.getElementById("introSkip");
+    const welcomePanel = document.getElementById("welcomePanel");
+    const welcomeName = document.getElementById("welcomeName");
+    const welcomeHint = document.getElementById("welcomeHint");
+    const welcomeMusic = document.getElementById("welcomeMusic");
+    const welcomePlay = document.getElementById("welcomePlay");
 
     const layout = [
       "#####################",
@@ -498,6 +657,8 @@
         down: "Bas",
         left: "Gauche",
         right: "Droite",
+        language: "Langue",
+        skip: "Passer l'animation",
         titleSub: "Record {n} — Entrée, Espace ou Jouer",
         ready: "READY!",
         readySub: "Prépare ton virage",
@@ -536,6 +697,8 @@
         down: "Down",
         left: "Left",
         right: "Right",
+        language: "Language",
+        skip: "Skip animation",
         titleSub: "Best {n} — Enter, Space or Play",
         ready: "READY!",
         readySub: "Get ready",
@@ -574,6 +737,8 @@
         down: "下",
         left: "左",
         right: "右",
+        language: "语言",
+        skip: "跳过动画",
         titleSub: "最高分 {n} — 回车、空格或开始",
         ready: "准备！",
         readySub: "准备好了",
@@ -615,7 +780,128 @@
       langBtn.setAttribute("aria-label", t("switchLang"));
       nameHint.textContent = "";
       updateMusicButton();
+      updateLangOptions();
+      updateWelcomeMusic();
       renderBoard(currentBoard, boardMode);
+    }
+
+    const INTRO_GHOST_COLORS = ["#ff4f5e", "#4de7ff", "#ff4fa3", "#ffad43"];
+    const INTRO_GHOST_X = [96, 190, 284, 378];
+    const INTRO_EAT_AT = [1.0, 2.5, 4.0, 5.5];
+    const INTRO_END = 6.3;
+    let introRaf = null;
+    let introStart = 0;
+    let introDone = false;
+
+    function drawIntroPacman(x, y, now) {
+      const mouth = Math.sin(now / 70) * 0.2 + 0.34;
+      introCtx.fillStyle = "#ffed4a";
+      introCtx.shadowColor = "rgba(255, 237, 74, 0.7)";
+      introCtx.shadowBlur = 12;
+      introCtx.beginPath();
+      introCtx.moveTo(x, y);
+      introCtx.arc(x, y, 15, mouth, Math.PI * 2 - mouth);
+      introCtx.closePath();
+      introCtx.fill();
+      introCtx.shadowBlur = 0;
+    }
+
+    function drawIntroGhost(x, y, color, now) {
+      const wobble = Math.sin(now / 110 + x) * 1.5;
+      introCtx.fillStyle = color;
+      introCtx.shadowColor = color;
+      introCtx.shadowBlur = 8;
+      introCtx.beginPath();
+      introCtx.arc(x, y + wobble, 13, Math.PI, 0);
+      introCtx.lineTo(x + 13, y + 26 + wobble);
+      introCtx.lineTo(x + 9, y + 20 + wobble);
+      introCtx.lineTo(x + 5, y + 26 + wobble);
+      introCtx.lineTo(x + 1, y + 20 + wobble);
+      introCtx.lineTo(x - 3, y + 26 + wobble);
+      introCtx.lineTo(x - 13, y + 26 + wobble);
+      introCtx.closePath();
+      introCtx.fill();
+      introCtx.shadowBlur = 0;
+      introCtx.fillStyle = "#fff";
+      introCtx.beginPath();
+      introCtx.arc(x - 5, y + 8, 4, 0, Math.PI * 2);
+      introCtx.arc(x + 5, y + 8, 4, 0, Math.PI * 2);
+      introCtx.fill();
+      introCtx.fillStyle = "#081238";
+      introCtx.beginPath();
+      introCtx.arc(x - 5, y + 9, 2, 0, Math.PI * 2);
+      introCtx.arc(x + 5, y + 9, 2, 0, Math.PI * 2);
+      introCtx.fill();
+    }
+
+    function drawIntro(now) {
+      if (introDone) return;
+      const t = (now - introStart) / 1000;
+      introCtx.clearRect(0, 0, introCanvas.width, introCanvas.height);
+      introCtx.fillStyle = "#02030b";
+      introCtx.fillRect(0, 0, introCanvas.width, introCanvas.height);
+      introCtx.fillStyle = "rgba(255, 246, 179, 0.7)";
+      for (let x = 10; x < introCanvas.width; x += 16) {
+        introCtx.beginPath();
+        introCtx.arc(x, 76, 2, 0, Math.PI * 2);
+        introCtx.fill();
+      }
+
+      const y = 50;
+      const maxX = introCanvas.width - 30;
+      const p = Math.min(1, t / INTRO_END);
+      const pacX = 30 + p * (maxX - 30);
+
+      for (let i = 0; i < INTRO_GHOST_X.length; i += 1) {
+        if (t < INTRO_EAT_AT[i]) {
+          drawIntroGhost(INTRO_GHOST_X[i], y, INTRO_GHOST_COLORS[i], now);
+        } else if (t < INTRO_EAT_AT[i] + 0.35) {
+          const k = (t - INTRO_EAT_AT[i]) / 0.35;
+          introCtx.globalAlpha = 1 - k;
+          introCtx.fillStyle = "#fff";
+          introCtx.font = "bold 22px Consolas, monospace";
+          introCtx.textAlign = "center";
+          introCtx.fillText("!", INTRO_GHOST_X[i], y - 8 - k * 30);
+          introCtx.globalAlpha = 1;
+        }
+      }
+
+      drawIntroPacman(pacX, y, now);
+
+      if (t >= INTRO_END) {
+        introDone = true;
+        showWelcomePanel();
+        return;
+      }
+      introRaf = requestAnimationFrame(drawIntro);
+    }
+
+    function startIntro() {
+      introDone = false;
+      introStart = performance.now();
+      introRaf = requestAnimationFrame(drawIntro);
+    }
+
+    function stopIntro() {
+      if (introRaf) cancelAnimationFrame(introRaf);
+      introRaf = null;
+      introDone = true;
+    }
+
+    function showWelcomePanel() {
+      welcomePanel.hidden = false;
+      welcomeName.focus();
+    }
+
+    function updateLangOptions() {
+      document.querySelectorAll(".lang-option").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+      });
+    }
+
+    function updateWelcomeMusic() {
+      welcomeMusic.classList.toggle("active", musicWanted);
+      welcomeMusic.textContent = "🎵 " + t("music") + " : " + (musicWanted ? "ON" : "OFF");
     }
 
     canvas.width = cols * tile;
@@ -650,6 +936,7 @@
     let lang = loadStorage("pacmanLang", "fr");
     let currentBoard = [];
     let boardMode = "local";
+    let musicWanted = loadStorage("pacmanMusic", "0") === "1";
     let level = 1;
     let lives = 3;
     let gameState = "title";
@@ -1464,6 +1751,7 @@
     }
 
     document.addEventListener("keydown", (event) => {
+      if (!welcomeEl.hidden) return;
       const map = {
         ArrowUp: "up",
         w: "up",
@@ -1569,6 +1857,52 @@
       button.addEventListener("click", () => setDirection(button.dataset.dir));
     });
 
+    introSkip.addEventListener("click", () => {
+      stopIntro();
+      showWelcomePanel();
+    });
+
+    document.querySelectorAll(".lang-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        lang = btn.dataset.lang;
+        saveStorage("pacmanLang", lang);
+        applyLang();
+      });
+    });
+
+    welcomeMusic.addEventListener("click", () => {
+      musicWanted = !musicWanted;
+      updateWelcomeMusic();
+    });
+
+    welcomePlay.addEventListener("click", () => {
+      const name = welcomeName.value.trim();
+      if (!name) {
+        welcomeName.focus();
+        welcomeHint.textContent = t("enterName");
+        return;
+      }
+      playerName = name.slice(0, 14);
+      nameInput.value = playerName;
+      saveStorage("pacmanName", playerName);
+      saveStorage("pacmanMusic", musicWanted ? "1" : "0");
+      if (musicWanted && !ytOpen) {
+        ytOpen = true;
+        ytWrap.hidden = false;
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.playVideo();
+        } else if (ytApiReady) {
+          buildYtPlayer();
+        } else {
+          loadYtApi();
+        }
+        updateMusicButton();
+      }
+      welcomeEl.hidden = true;
+      welcomeHint.textContent = "";
+      startGame();
+    });
+
     const LANG_ORDER = ["fr", "en", "zh"];
     langBtn.addEventListener("click", () => {
       const idx = LANG_ORDER.indexOf(lang);
@@ -1584,6 +1918,16 @@
         startGame();
       }
     });
+    welcomeName.value = playerName;
+    welcomeName.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        welcomePlay.click();
+      }
+    });
+    updateLangOptions();
+    updateWelcomeMusic();
+    startIntro();
     currentBoard = loadBoard();
     boardMode = "local";
     applyLang();
