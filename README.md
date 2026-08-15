@@ -30,6 +30,12 @@ Aucune installation, aucun compte — ça tourne aussi sur mobile (contrôles ta
 
 Ouvre simplement `index.html` dans un navigateur (aucun serveur requis).
 
+## 📜 Licence & mentions légales
+
+- **Code** : distribué sous licence **MIT** — voir le fichier [`LICENSE`](LICENSE). Libre à toi de le réutiliser, le modifier et le partager.
+- **⚠️ Projet non commercial** : ce jeu est une réalisation personnelle **à but éducatif et non commercial**, créée pour apprendre à coder. Il n'est pas affilié, sponsorisé ni approuvé par Bandai Namco Entertainment.
+- **« Pac-Man »** est une marque déposée de Bandai Namco Entertainment. La licence MIT ne couvre que le code original de ce projet, pas la marque ni les graphismes de Bandai Namco.
+
 ## 🙏 Special thanks
 
 ✨ Un grand merci à [Freebuff](https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611), l'agent de code gratuit qui m'a aidé à créer ce jeu. 🚀 C'est gratuit, essayez-le !
