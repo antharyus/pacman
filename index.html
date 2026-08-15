@@ -442,6 +442,40 @@
       letter-spacing: 0.08em;
     }
 
+    .footer {
+      width: min(100%, 620px);
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      padding: 14px 10px;
+      margin-top: 4px;
+      border-top: 1px solid rgba(84, 168, 255, 0.25);
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .footer a {
+      color: var(--blue-hot);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-made {
+      margin: 0;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .footer-legal,
+    .footer-copy {
+      margin: 0;
+    }
+
     @media (max-width: 620px) {
       main {
         padding: 10px;
@@ -547,6 +581,12 @@
       <button data-dir="down" type="button" data-i18n="down">Bas</button>
       <button data-dir="right" type="button" data-i18n="right">Droite</button>
     </section>
+
+    <footer class="footer">
+      <p class="footer-made" data-i18n-html="madeWith">Jeu réalisé avec <a href="https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611" target="_blank" rel="noopener">Freebuff</a> 🚀</p>
+      <p class="footer-legal" data-i18n="legal">Projet personnel à but éducatif, sans affiliation avec Bandai Namco Entertainment.</p>
+      <p class="footer-copy">© 2026 · <a href="https://github.com/antharyus/pacman" target="_blank" rel="noopener">github.com/antharyus/pacman</a></p>
+    </footer>
   </main>
 
   <script>
@@ -659,6 +699,8 @@
         right: "Droite",
         language: "Langue",
         skip: "Passer l'animation",
+        madeWith: "Jeu réalisé avec <a href='https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611' target='_blank' rel='noopener'>Freebuff</a> 🚀 — l'agent de code gratuit, essaye-le pour faire pareil !",
+        legal: "Projet personnel à but éducatif, sans affiliation avec Bandai Namco Entertainment. « Pac-Man » est une marque de Bandai Namco.",
         titleSub: "Record {n} — Entrée, Espace ou Jouer",
         ready: "READY!",
         readySub: "Prépare ton virage",
@@ -699,6 +741,8 @@
         right: "Right",
         language: "Language",
         skip: "Skip animation",
+        madeWith: "Made with <a href='https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611' target='_blank' rel='noopener'>Freebuff</a> 🚀 — the free coding agent. Try it and build your own!",
+        legal: "Personal project for learning purposes, not affiliated with Bandai Namco Entertainment. 'Pac-Man' is a trademark of Bandai Namco.",
         titleSub: "Best {n} — Enter, Space or Play",
         ready: "READY!",
         readySub: "Get ready",
@@ -739,6 +783,8 @@
         right: "右",
         language: "语言",
         skip: "跳过动画",
+        madeWith: "使用 <a href='https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611' target='_blank' rel='noopener'>Freebuff</a> 制作 🚀 — 免费的编程助手，快来试试做你自己的游戏！",
+        legal: "个人学习项目，与万代南梦宫娱乐无关。「Pac-Man」是万代南梦宫的商标。",
         titleSub: "最高分 {n} — 回车、空格或开始",
         ready: "准备！",
         readySub: "准备好了",
@@ -766,6 +812,9 @@
     function applyLang() {
       document.querySelectorAll("[data-i18n]").forEach((el) => {
         el.textContent = t(el.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+        el.innerHTML = t(el.dataset.i18nHtml);
       });
       document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
         el.placeholder = t(el.dataset.i18nPlaceholder);
