@@ -1,0 +1,23 @@
+name: Keep Supabase awake
+
+on:
+  schedule:
+    # 00:00 UTC on days 1, 7, 13, 19, 25 of each month (~every 6 days).
+    # The free tier pauses projects after 7 days without any request.
+    - cron: "0 0 */6 * *"
+  workflow_dispatch:
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the scores table
+        run: |
+          STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "https://pncqjlivajlbugbbpmlb.supabase.co/rest/v1/scores?select=id&limit=1" \
+            -H "apikey: sb_publishable_Gblx9-MvPfGsAbcL9QeeEw__rj6gove" \
+            -H "Authorization: Bearer sb_publishable_Gblx9-MvPfGsAbcL9QeeEw__rj6gove")
+          echo "Supabase responded HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::warning::heartbeat got HTTP $STATUS (project may be paused — restore it in the Supabase dashboard)"
+          fi
