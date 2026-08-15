@@ -461,14 +461,14 @@
     const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
     const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
     const fruits = [
-      { fr: "Cerise", en: "Cherry", points: 100, color: "#ff4f5e" },
-      { fr: "Fraise", en: "Strawberry", points: 300, color: "#ff5f7a" },
-      { fr: "Orange", en: "Orange", points: 500, color: "#ffad43" },
-      { fr: "Pomme", en: "Apple", points: 700, color: "#7dff5e" },
-      { fr: "Melon", en: "Melon", points: 1000, color: "#8dff9e" },
-      { fr: "Galaxian", en: "Galaxian", points: 2000, color: "#4de7ff" },
-      { fr: "Cloche", en: "Bell", points: 3000, color: "#ffed4a" },
-      { fr: "Clé", en: "Key", points: 5000, color: "#f6f7ff" }
+      { fr: "Cerise", en: "Cherry", zh: "樱桃", points: 100, color: "#ff4f5e" },
+      { fr: "Fraise", en: "Strawberry", zh: "草莓", points: 300, color: "#ff5f7a" },
+      { fr: "Orange", en: "Orange", zh: "橙子", points: 500, color: "#ffad43" },
+      { fr: "Pomme", en: "Apple", zh: "苹果", points: 700, color: "#7dff5e" },
+      { fr: "Melon", en: "Melon", zh: "甜瓜", points: 1000, color: "#8dff9e" },
+      { fr: "Galaxian", en: "Galaxian", zh: "Galaxian", points: 2000, color: "#4de7ff" },
+      { fr: "Cloche", en: "Bell", zh: "铃铛", points: 3000, color: "#ffed4a" },
+      { fr: "Clé", en: "Key", zh: "钥匙", points: 5000, color: "#f6f7ff" }
     ];
 
     const I18N = {
@@ -547,6 +547,44 @@
         gameOverSub: "Enter, Space or Play to restart",
         power: "+{n} POWER",
         life: "+1 LIFE"
+      },
+      zh: {
+        play: "开始",
+        pause: "暂停",
+        music: "音乐",
+        musicOn: "音乐开",
+        restart: "重新开始",
+        switchLang: "切换语言",
+        score: "分数",
+        best: "最高分",
+        level: "关卡",
+        lives: "生命",
+        remaining: "剩余",
+        help: "方向键、WASD 或 ZQSD 移动。回车/空格开始，P 暂停，R 重新开始。",
+        pseudo: "昵称",
+        pseudoPlaceholder: "你的昵称...",
+        top5: "TOP 5",
+        world: "全球",
+        local: "本地",
+        noScores: "暂无分数",
+        enterName: "输入昵称才能开始！",
+        music1984: "1984 音乐",
+        close: "关闭",
+        up: "上",
+        down: "下",
+        left: "左",
+        right: "右",
+        titleSub: "最高分 {n} — 回车、空格或开始",
+        ready: "准备！",
+        readySub: "准备好了",
+        paused: "暂停",
+        pausedSub: "按 P 继续",
+        levelClear: "关卡完成",
+        levelClearSub: "下一关...",
+        gameOver: "游戏结束",
+        gameOverSub: "回车、空格或开始重新开始",
+        power: "+{n} 能量",
+        life: "+1 生命"
       }
     };
 
@@ -572,7 +610,7 @@
         el.title = label;
         el.setAttribute("aria-label", label);
       });
-      langBtn.textContent = "🌐 " + lang.toUpperCase();
+      langBtn.textContent = "🌐 " + (lang === "zh" ? "中" : lang.toUpperCase());
       langBtn.title = t("switchLang");
       langBtn.setAttribute("aria-label", t("switchLang"));
       nameHint.textContent = "";
@@ -1531,8 +1569,10 @@
       button.addEventListener("click", () => setDirection(button.dataset.dir));
     });
 
+    const LANG_ORDER = ["fr", "en", "zh"];
     langBtn.addEventListener("click", () => {
-      lang = lang === "fr" ? "en" : "fr";
+      const idx = LANG_ORDER.indexOf(lang);
+      lang = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
       saveStorage("pacmanLang", lang);
       applyLang();
     });
