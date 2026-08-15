@@ -210,6 +210,86 @@
       height: 100%;
     }
 
+    .board {
+      width: min(100%, 620px);
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 237, 74, 0.45);
+      border-radius: 10px;
+      background: rgba(7, 10, 31, 0.9);
+      display: grid;
+      gap: 8px;
+    }
+
+    .player-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .player-box label {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .player-box input {
+      flex: 1;
+      min-width: 0;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid rgba(84, 168, 255, 0.55);
+      border-radius: 6px;
+      background: rgba(2, 3, 11, 0.8);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .player-box input:focus {
+      outline: none;
+      border-color: var(--yellow);
+      box-shadow: 0 0 14px rgba(255, 237, 74, 0.25);
+    }
+
+    .name-hint {
+      margin: 0;
+      min-height: 16px;
+      color: var(--pink);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .board-title {
+      color: var(--yellow);
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-align: center;
+    }
+
+    .board-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 4px;
+    }
+
+    .board-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(13, 18, 56, 0.7);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .board-empty {
+      color: var(--muted);
+      justify-content: center;
+    }
+
     @media (max-width: 620px) {
       main {
         padding: 10px;
@@ -272,6 +352,16 @@
 
     <p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
 
+    <section class="board" aria-label="Classement">
+      <div class="player-box">
+        <label for="nameInput">Pseudo</label>
+        <input id="nameInput" type="text" maxlength="14" placeholder="Ton pseudo..." autocomplete="off" />
+      </div>
+      <p id="nameHint" class="name-hint"></p>
+      <div class="board-title">TOP 5</div>
+      <ol id="boardList" class="board-list"></ol>
+    </section>
+
     <section class="touch-pad" aria-label="Contrôles tactiles">
       <button class="empty" tabindex="-1" type="button"></button>
       <button data-dir="up" type="button">Haut</button>
@@ -296,6 +386,9 @@
     const restartBtn = document.getElementById("restartBtn");
     const ytWrap = document.getElementById("ytWrap");
     const ytClose = document.getElementById("ytClose");
+    const nameInput = document.getElementById("nameInput");
+    const nameHint = document.getElementById("nameHint");
+    const boardList = document.getElementById("boardList");
 
     const layout = [
       "#####################",
@@ -377,6 +470,7 @@
     let powers = new Set();
     let score = 0;
     let best = Number(loadStorage("pacmanBest", "0"));
+    let playerName = loadStorage("pacmanName", "");
     let level = 1;
     let lives = 3;
     let gameState = "title";
@@ -638,6 +732,61 @@
       playStartSound();
     }
 
+    function loadBoard() {
+      try {
+        return JSON.parse(loadStorage("pacmanBoard", "[]")) || [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function renderBoard() {
+      const board = loadBoard();
+      boardList.innerHTML = "";
+      if (board.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "Aucun score pour l'instant";
+        li.className = "board-empty";
+        boardList.appendChild(li);
+        return;
+      }
+      const ranks = ["1er", "2e", "3e", "4e", "5e"];
+      board.forEach((entry, index) => {
+        const li = document.createElement("li");
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = `${ranks[index]} ${entry.name}`;
+        const scoreSpan = document.createElement("span");
+        scoreSpan.textContent = String(entry.score);
+        li.appendChild(nameSpan);
+        li.appendChild(scoreSpan);
+        boardList.appendChild(li);
+      });
+    }
+
+    function saveCurrentScore() {
+      if (score <= 0) return;
+      const name = (nameInput.value.trim() || playerName || "ANONYME").slice(0, 14);
+      const board = loadBoard();
+      board.push({ name, score, level });
+      board.sort((a, b) => b.score - a.score);
+      saveStorage("pacmanBoard", JSON.stringify(board.slice(0, 5)));
+      renderBoard();
+    }
+
+    function startGame() {
+      const name = nameInput.value.trim() || playerName;
+      if (!name) {
+        nameInput.focus();
+        nameHint.textContent = "Entre un pseudo pour jouer !";
+        return;
+      }
+      playerName = name.slice(0, 14);
+      nameInput.value = playerName;
+      saveStorage("pacmanName", playerName);
+      nameHint.textContent = "";
+      newGame();
+    }
+
     function nextLevel() {
       level += 1;
       buildLevel();
@@ -772,7 +921,7 @@
       if (!dirs[dirName]) return;
       startAudio();
       if (gameState === "title" || gameState === "gameOver") {
-        newGame();
+        startGame();
       }
       if (gameState !== "playing" && gameState !== "ready") return;
       pacman.nextDir = dirName;
@@ -1032,6 +1181,7 @@
       if (gameState === "dying" && now >= dyingUntil) {
         if (lives <= 0) {
           gameState = "gameOver";
+          saveCurrentScore();
         } else {
           resetAfterHit();
         }
@@ -1095,10 +1245,10 @@
       }
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        if (gameState === "title" || gameState === "gameOver") newGame();
+        if (gameState === "title" || gameState === "gameOver") startGame();
       }
       if (event.key.toLowerCase() === "p") togglePause();
-      if (event.key.toLowerCase() === "r") newGame();
+      if (event.key.toLowerCase() === "r") startGame();
     });
 
     document.addEventListener("visibilitychange", () => {
@@ -1110,8 +1260,8 @@
       }
     });
 
-    startBtn.addEventListener("click", newGame);
-    restartBtn.addEventListener("click", newGame);
+    startBtn.addEventListener("click", startGame);
+    restartBtn.addEventListener("click", startGame);
     pauseBtn.addEventListener("click", togglePause);
     const YT_VIDEO_ID = "kJp3jISVNY0";
     let ytPlayer = null;
@@ -1179,6 +1329,15 @@
     document.querySelectorAll("[data-dir]").forEach((button) => {
       button.addEventListener("click", () => setDirection(button.dataset.dir));
     });
+
+    nameInput.value = playerName;
+    nameInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        startGame();
+      }
+    });
+    renderBoard();
 
     buildMazeCache();
     buildLevel();
