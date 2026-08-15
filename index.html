@@ -306,6 +306,13 @@
       text-align: center;
     }
 
+    .board-stats {
+      color: var(--blue-hot);
+      font-size: 13px;
+      text-align: center;
+      min-height: 18px;
+    }
+
     .board-list {
       margin: 0;
       padding: 0;
@@ -604,6 +611,7 @@
       </div>
       <p id="nameHint" class="name-hint"></p>
       <div class="board-title" id="boardTitle">TOP 5 LOCAL</div>
+      <div class="board-stats" id="boardStats" aria-live="polite"></div>
       <ol id="boardList" class="board-list"></ol>
     </section>
 
@@ -633,6 +641,7 @@
     const nameHint = document.getElementById("nameHint");
     const boardList = document.getElementById("boardList");
     const boardTitle = document.getElementById("boardTitle");
+    const statsEl = document.getElementById("boardStats");
     const langBtn = document.getElementById("langBtn");
     const welcomeEl = document.getElementById("welcome");
     const introCanvas = document.getElementById("intro");
@@ -812,6 +821,8 @@
         world: "MONDIAL",
         local: "LOCAL",
         noScores: "Aucun score pour l'instant",
+        statsRank: "👥 {p} participants · 🏅 Ta place : {r} / {p}",
+        statsEmpty: "👥 {p} participants · 🎯 Joue une partie pour entrer au classement !",
         enterName: "Entre un pseudo pour jouer !",
         music1984: "Musique 1984",
         close: "Fermer",
@@ -860,6 +871,8 @@
         world: "GLOBAL",
         local: "LOCAL",
         noScores: "No scores yet",
+        statsRank: "👥 {p} players · 🏅 Your rank: {r} / {p}",
+        statsEmpty: "👥 {p} players · 🎯 Play a round to enter the leaderboard!",
         enterName: "Enter a nickname to play!",
         music1984: "1984 Music",
         close: "Close",
@@ -908,6 +921,8 @@
         world: "全球",
         local: "本地",
         noScores: "暂无分数",
+        statsRank: "👥 {p} 名玩家 · 🏅 你的排名：第{r} / {p}",
+        statsEmpty: "👥 {p} 名玩家 · 🎯 玩一局进入排行榜吧！",
         enterName: "输入昵称才能开始！",
         music1984: "1984 音乐",
         close: "关闭",
@@ -939,7 +954,7 @@
       let text = (I18N[lang] && I18N[lang][key]) ?? I18N.fr[key] ?? key;
       if (vars) {
         for (const name of Object.keys(vars)) {
-          text = text.replace(`{${name}}`, String(vars[name]));
+          text = text.split(`{${name}}`).join(String(vars[name]));
         }
       }
       return text;
@@ -1412,6 +1427,7 @@
       boardMode = mode || "local";
       boardTitle.textContent = `${t("top5")} ${t(boardMode === "world" ? "world" : "local")}`;
       boardList.innerHTML = "";
+      renderStats();
       if (currentBoard.length === 0) {
         const li = document.createElement("li");
         li.textContent = t("noScores");
@@ -1432,10 +1448,43 @@
       });
     }
 
+    function ordinalFor(n) {
+      if (lang === "en") {
+        const s = n % 10;
+        const h = n % 100;
+        const suffix = s === 1 && h !== 11 ? "st" : s === 2 && h !== 12 ? "nd" : s === 3 && h !== 13 ? "rd" : "th";
+        return `${n}${suffix}`;
+      }
+      if (lang === "zh") return String(n);
+      return n === 1 ? "1ᵉʳ" : `${n}ᵉ`;
+    }
+
+    function renderStats() {
+      const entries = currentBoard || [];
+      if (!entries.length) {
+        statsEl.textContent = "";
+        return;
+      }
+      const bestByPlayer = new Map();
+      for (const e of entries) {
+        const b = bestByPlayer.get(e.name) || 0;
+        if (e.score > b) bestByPlayer.set(e.name, e.score);
+      }
+      const participants = bestByPlayer.size;
+      const myBest = bestByPlayer.get(playerName) || 0;
+      if (myBest <= 0) {
+        statsEl.textContent = t("statsEmpty", { p: participants });
+        return;
+      }
+      let rank = 1;
+      for (const b of bestByPlayer.values()) if (b > myBest) rank++;
+      statsEl.textContent = t("statsRank", { p: participants, r: ordinalFor(rank) });
+    }
+
     async function fetchOnlineBoard() {
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/scores?select=name,score,level&order=score.desc&limit=5`,
+          `${SUPABASE_URL}/rest/v1/scores?select=name,score&order=score.desc&limit=1000`,
           {
             headers: {
               apikey: SUPABASE_ANON_KEY,
