@@ -358,7 +358,7 @@
         <input id="nameInput" type="text" maxlength="14" placeholder="Ton pseudo..." autocomplete="off" />
       </div>
       <p id="nameHint" class="name-hint"></p>
-      <div class="board-title">TOP 5</div>
+      <div class="board-title" id="boardTitle">TOP 5 LOCAL</div>
       <ol id="boardList" class="board-list"></ol>
     </section>
 
@@ -389,6 +389,7 @@
     const nameInput = document.getElementById("nameInput");
     const nameHint = document.getElementById("nameHint");
     const boardList = document.getElementById("boardList");
+    const boardTitle = document.getElementById("boardTitle");
 
     const layout = [
       "#####################",
@@ -732,6 +733,9 @@
       playStartSound();
     }
 
+    const SUPABASE_URL = "https://pncqjlivajlbugbbpmlb.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Gblx9-MvPfGsAbcL9QeeEw__rj6gove";
+
     function loadBoard() {
       try {
         return JSON.parse(loadStorage("pacmanBoard", "[]")) || [];
@@ -740,10 +744,10 @@
       }
     }
 
-    function renderBoard() {
-      const board = loadBoard();
+    function renderBoard(entries, title) {
+      boardTitle.textContent = title;
       boardList.innerHTML = "";
-      if (board.length === 0) {
+      if (!entries || entries.length === 0) {
         const li = document.createElement("li");
         li.textContent = "Aucun score pour l'instant";
         li.className = "board-empty";
@@ -751,7 +755,7 @@
         return;
       }
       const ranks = ["1er", "2e", "3e", "4e", "5e"];
-      board.forEach((entry, index) => {
+      entries.slice(0, 5).forEach((entry, index) => {
         const li = document.createElement("li");
         const nameSpan = document.createElement("span");
         nameSpan.textContent = `${ranks[index]} ${entry.name}`;
@@ -763,14 +767,66 @@
       });
     }
 
-    function saveCurrentScore() {
+    async function fetchOnlineBoard() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/scores?select=name,score,level&order=score.desc&limit=5`,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        return null;
+      }
+    }
+
+    async function postScore(name, scoreValue, levelValue) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal"
+          },
+          body: JSON.stringify({ name, score: scoreValue, level: levelValue })
+        });
+        return res.ok;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    async function refreshBoard() {
+      const online = await fetchOnlineBoard();
+      if (online) {
+        renderBoard(online, "TOP 5 MONDIAL");
+      } else {
+        renderBoard(loadBoard(), "TOP 5 LOCAL");
+      }
+    }
+
+    async function saveCurrentScore() {
       if (score <= 0) return;
       const name = (nameInput.value.trim() || playerName || "ANONYME").slice(0, 14);
+      const finalScore = score;
+      const finalLevel = level;
       const board = loadBoard();
-      board.push({ name, score, level });
+      board.push({ name, score: finalScore, level: finalLevel });
       board.sort((a, b) => b.score - a.score);
       saveStorage("pacmanBoard", JSON.stringify(board.slice(0, 5)));
-      renderBoard();
+      const ok = await postScore(name, finalScore, finalLevel);
+      if (!ok) {
+        renderBoard(loadBoard(), "TOP 5 LOCAL");
+        return;
+      }
+      await refreshBoard();
     }
 
     function startGame() {
@@ -1337,7 +1393,8 @@
         startGame();
       }
     });
-    renderBoard();
+    renderBoard(loadBoard(), "TOP 5 LOCAL");
+    refreshBoard();
 
     buildMazeCache();
     buildLevel();
