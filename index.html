@@ -246,7 +246,6 @@
         <button id="startBtn" type="button">Jouer</button>
         <button id="pauseBtn" type="button">Pause</button>
         <button id="musicBtn" type="button">Musique</button>
-        <button id="songBtn" type="button">Chanson 1984</button>
         <button id="restartBtn" type="button">Redémarrer</button>
       </div>
     </section>
@@ -294,7 +293,6 @@
     const startBtn = document.getElementById("startBtn");
     const pauseBtn = document.getElementById("pauseBtn");
     const musicBtn = document.getElementById("musicBtn");
-    const songBtn = document.getElementById("songBtn");
     const restartBtn = document.getElementById("restartBtn");
     const ytWrap = document.getElementById("ytWrap");
     const ytClose = document.getElementById("ytClose");
@@ -389,9 +387,6 @@
     let lastPlayerMove = 0;
     let lastGhostMove = 0;
     let audioCtx;
-    let musicTimer;
-    let musicEnabled = loadStorage("pacmanMusic", "0") === "1";
-    let musicStep = 0;
     let pelletStep = 0;
     let lastBumpSound = 0;
     let dyingUntil = 0;
@@ -548,31 +543,8 @@
       noise(0.035, 0.012);
     }
 
-    function playMusicStep() {
-      if (!musicEnabled || !audioCtx) return;
-      const melody = [392, 523, 659, 523, 440, 587, 740, 587, 392, 494, 622, 494, 330, 440, 554, 440];
-      const bass = [98, 98, 131, 131, 110, 110, 147, 147];
-      beep(melody[musicStep % melody.length], 0.075, "square", 0.018);
-      if (musicStep % 2 === 0) beep(bass[(musicStep / 2) % bass.length], 0.09, "triangle", 0.016);
-      musicStep += 1;
-    }
-
     function updateMusicButton() {
-      musicBtn.textContent = musicEnabled ? "Musique ON" : "Musique";
-    }
-
-    function toggleMusic() {
-      startAudio();
-      musicEnabled = !musicEnabled;
-      saveStorage("pacmanMusic", musicEnabled ? "1" : "0");
-      if (musicEnabled && !musicTimer) {
-        musicTimer = setInterval(playMusicStep, 155);
-      }
-      if (!musicEnabled && musicTimer) {
-        clearInterval(musicTimer);
-        musicTimer = undefined;
-      }
-      updateMusicButton();
+      musicBtn.textContent = ytOpen ? "Musique ON" : "Musique";
     }
 
     function award(points, x, y, label) {
@@ -1141,7 +1113,6 @@
     startBtn.addEventListener("click", newGame);
     restartBtn.addEventListener("click", newGame);
     pauseBtn.addEventListener("click", togglePause);
-    musicBtn.addEventListener("click", toggleMusic);
     const YT_VIDEO_ID = "kJp3jISVNY0";
     let ytPlayer = null;
     let ytApiReady = false;
@@ -1178,22 +1149,32 @@
       if (ytOpen) buildYtPlayer();
     };
 
-    songBtn.addEventListener("click", () => {
-      ytOpen = true;
-      ytWrap.hidden = false;
-      if (ytPlayer && typeof ytPlayer.playVideo === "function") {
-        ytPlayer.playVideo();
-      } else if (ytApiReady) {
-        buildYtPlayer();
+    function toggleYouTube() {
+      if (ytOpen) {
+        ytOpen = false;
+        ytWrap.hidden = true;
+        if (ytPlayer && typeof ytPlayer.pauseVideo === "function") ytPlayer.pauseVideo();
       } else {
-        loadYtApi();
+        ytOpen = true;
+        ytWrap.hidden = false;
+        if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+          ytPlayer.playVideo();
+        } else if (ytApiReady) {
+          buildYtPlayer();
+        } else {
+          loadYtApi();
+        }
       }
-    });
+      updateMusicButton();
+    }
+
+    musicBtn.addEventListener("click", toggleYouTube);
 
     ytClose.addEventListener("click", () => {
       ytOpen = false;
       ytWrap.hidden = true;
       if (ytPlayer && typeof ytPlayer.pauseVideo === "function") ytPlayer.pauseVideo();
+      updateMusicButton();
     });
     document.querySelectorAll("[data-dir]").forEach((button) => {
       button.addEventListener("click", () => setDirection(button.dataset.dir));
@@ -1204,7 +1185,6 @@
     gameState = "title";
     updateHud();
     updateMusicButton();
-    if (musicEnabled) musicTimer = setInterval(playMusicStep, 155);
     requestAnimationFrame(update);
   </script>
 </body>
