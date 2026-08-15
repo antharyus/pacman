@@ -167,6 +167,49 @@
       visibility: hidden;
     }
 
+    .yt-wrap {
+      width: min(100%, 620px);
+      overflow: hidden;
+      border: 1px solid rgba(255, 79, 94, 0.55);
+      border-radius: 10px;
+      background: rgba(7, 10, 31, 0.92);
+      box-shadow: 0 0 24px rgba(255, 79, 94, 0.22);
+    }
+
+    .yt-wrap[hidden] {
+      display: none;
+    }
+
+    .yt-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 13px;
+      border-bottom: 1px solid rgba(84, 168, 255, 0.25);
+    }
+
+    .yt-bar button {
+      min-height: 0;
+      padding: 3px 10px;
+      line-height: 1.5;
+    }
+
+    .yt-player {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      background: #000;
+    }
+
+    #ytPlayer,
+    .yt-player iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     @media (max-width: 620px) {
       main {
         padding: 10px;
@@ -220,6 +263,14 @@
       <canvas id="game" aria-label="Jeu Pacman"></canvas>
     </section>
 
+    <section class="yt-wrap" id="ytWrap" aria-label="Lecteur musique" hidden>
+      <div class="yt-bar">
+        <span>🎵 Musique 1984</span>
+        <button id="ytClose" type="button">Fermer</button>
+      </div>
+      <div class="yt-player"><div id="ytPlayer"></div></div>
+    </section>
+
     <p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
 
     <section class="touch-pad" aria-label="Contrôles tactiles">
@@ -245,6 +296,8 @@
     const musicBtn = document.getElementById("musicBtn");
     const songBtn = document.getElementById("songBtn");
     const restartBtn = document.getElementById("restartBtn");
+    const ytWrap = document.getElementById("ytWrap");
+    const ytClose = document.getElementById("ytClose");
 
     const layout = [
       "#####################",
@@ -1089,8 +1142,58 @@
     restartBtn.addEventListener("click", newGame);
     pauseBtn.addEventListener("click", togglePause);
     musicBtn.addEventListener("click", toggleMusic);
+    const YT_VIDEO_ID = "kJp3jISVNY0";
+    let ytPlayer = null;
+    let ytApiReady = false;
+    let ytOpen = false;
+
+    function buildYtPlayer() {
+      if (ytPlayer) return;
+      ytPlayer = new YT.Player("ytPlayer", {
+        videoId: YT_VIDEO_ID,
+        width: "100%",
+        height: "100%",
+        playerVars: { autoplay: 0, playsinline: 1, rel: 0 },
+        events: {
+          onReady: (event) => {
+            if (ytOpen) event.target.playVideo();
+          }
+        }
+      });
+    }
+
+    function loadYtApi() {
+      if (window.YT && window.YT.Player) {
+        ytApiReady = true;
+        buildYtPlayer();
+        return;
+      }
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      ytApiReady = true;
+      if (ytOpen) buildYtPlayer();
+    };
+
     songBtn.addEventListener("click", () => {
-      window.open("https://www.youtube.com/watch?v=kJp3jISVNY0", "_blank", "noopener");
+      ytOpen = true;
+      ytWrap.hidden = false;
+      if (ytPlayer && typeof ytPlayer.playVideo === "function") {
+        ytPlayer.playVideo();
+      } else if (ytApiReady) {
+        buildYtPlayer();
+      } else {
+        loadYtApi();
+      }
+    });
+
+    ytClose.addEventListener("click", () => {
+      ytOpen = false;
+      ytWrap.hidden = true;
+      if (ytPlayer && typeof ytPlayer.pauseVideo === "function") ytPlayer.pauseVideo();
     });
     document.querySelectorAll("[data-dir]").forEach((button) => {
       button.addEventListener("click", () => setDirection(button.dataset.dir));
