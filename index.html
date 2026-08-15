@@ -1,1092 +1,1108 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pacman Arcade</title>
-  <style>
-    :root {
-      --bg: #02030b;
-      --panel: #070a1f;
-      --panel-2: #0d1238;
-      --blue: #2446ff;
-      --blue-hot: #54a8ff;
-      --yellow: #ffed4a;
-      --pink: #ff4fa3;
-      --cyan: #4de7ff;
-      --red: #ff4f5e;
-      --orange: #ffad43;
-      --text: #f6f7ff;
-      --muted: #aeb8ff;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pacman Arcade</title>
+<style>
+:root {
+--bg: #02030b;
+--panel: #070a1f;
+--panel-2: #0d1238;
+--blue: #2446ff;
+--blue-hot: #54a8ff;
+--yellow: #ffed4a;
+--pink: #ff4fa3;
+--cyan: #4de7ff;
+--red: #ff4f5e;
+--orange: #ffad43;
+--text: #f6f7ff;
+--muted: #aeb8ff;
+}
 
-    * {
-      box-sizing: border-box;
-    }
+* {
+box-sizing: border-box;
+}
 
-    body {
-      min-height: 100vh;
-      margin: 0;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 50% -10%, rgba(36, 70, 255, 0.26), transparent 34rem),
-        radial-gradient(circle at 10% 90%, rgba(255, 237, 74, 0.08), transparent 18rem),
-        var(--bg);
-      color: var(--text);
-      font-family: Consolas, Monaco, "Courier New", monospace;
-    }
+body {
+min-height: 100vh;
+margin: 0;
+display: grid;
+place-items: center;
+background:
+radial-gradient(circle at 50% -10%, rgba(36, 70, 255, 0.26), transparent 34rem),
+radial-gradient(circle at 10% 90%, rgba(255, 237, 74, 0.08), transparent 18rem),
+var(--bg);
+color: var(--text);
+font-family: Consolas, Monaco, "Courier New", monospace;
+}
 
-    main {
-      width: min(96vw, 760px);
-      padding: 18px;
-      display: grid;
-      gap: 12px;
-      justify-items: center;
-    }
+main {
+width: min(96vw, 760px);
+padding: 18px;
+display: grid;
+gap: 12px;
+justify-items: center;
+}
 
-    .marquee {
-      width: min(100%, 620px);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border: 1px solid rgba(84, 168, 255, 0.55);
-      border-radius: 8px;
-      background: linear-gradient(180deg, rgba(13, 18, 56, 0.96), rgba(7, 10, 31, 0.96));
-      box-shadow: 0 0 24px rgba(36, 70, 255, 0.28), inset 0 0 18px rgba(84, 168, 255, 0.08);
-    }
+.marquee {
+width: min(100%, 620px);
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 12px;
+padding: 10px 14px;
+border: 1px solid rgba(84, 168, 255, 0.55);
+border-radius: 8px;
+background: linear-gradient(180deg, rgba(13, 18, 56, 0.96), rgba(7, 10, 31, 0.96));
+box-shadow: 0 0 24px rgba(36, 70, 255, 0.28), inset 0 0 18px rgba(84, 168, 255, 0.08);
+}
 
-    .brand {
-      color: var(--yellow);
-      font-size: clamp(18px, 5vw, 28px);
-      letter-spacing: 0.08em;
-      text-shadow: 0 0 12px rgba(255, 237, 74, 0.65);
-      white-space: nowrap;
-    }
+.brand {
+color: var(--yellow);
+font-size: clamp(18px, 5vw, 28px);
+letter-spacing: 0.08em;
+text-shadow: 0 0 12px rgba(255, 237, 74, 0.65);
+white-space: nowrap;
+}
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+.actions {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+justify-content: flex-end;
+}
 
-    button {
-      min-height: 38px;
-      border: 1px solid var(--yellow);
-      border-radius: 6px;
-      padding: 8px 12px;
-      background: #101540;
-      color: var(--yellow);
-      cursor: pointer;
-      font: inherit;
-      font-weight: 700;
-      box-shadow: inset 0 0 12px rgba(255, 237, 74, 0.08);
-    }
+button {
+min-height: 38px;
+border: 1px solid var(--yellow);
+border-radius: 6px;
+padding: 8px 12px;
+background: #101540;
+color: var(--yellow);
+cursor: pointer;
+font: inherit;
+font-weight: 700;
+box-shadow: inset 0 0 12px rgba(255, 237, 74, 0.08);
+}
 
-    button:hover,
-    button:focus-visible {
-      background: #1a205e;
-      outline: none;
-      box-shadow: 0 0 16px rgba(255, 237, 74, 0.28);
-    }
+button:hover,
+button:focus-visible {
+background: #1a205e;
+outline: none;
+box-shadow: 0 0 16px rgba(255, 237, 74, 0.28);
+}
 
-    .hud {
-      width: min(100%, 620px);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
-    }
+.hud {
+width: min(100%, 620px);
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 8px;
+}
 
-    .hud-item {
-      min-height: 48px;
-      padding: 8px 10px;
-      border: 1px solid rgba(84, 168, 255, 0.35);
-      border-radius: 6px;
-      background: rgba(7, 10, 31, 0.86);
-      text-align: center;
-    }
+.hud-item {
+min-height: 48px;
+padding: 8px 10px;
+border: 1px solid rgba(84, 168, 255, 0.35);
+border-radius: 6px;
+background: rgba(7, 10, 31, 0.86);
+text-align: center;
+}
 
-    .hud-item span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-    }
+.hud-item span {
+display: block;
+color: var(--muted);
+font-size: 11px;
+text-transform: uppercase;
+}
 
-    .hud-item strong {
-      color: #fff;
-      font-size: 16px;
-    }
+.hud-item strong {
+color: #fff;
+font-size: 16px;
+}
 
-    .game-shell {
-      position: relative;
-      width: min(100%, 620px);
-      display: grid;
-      place-items: center;
-      padding: 10px;
-      border: 1px solid rgba(84, 168, 255, 0.55);
-      border-radius: 10px;
-      background: linear-gradient(180deg, rgba(4, 5, 18, 0.96), rgba(2, 3, 11, 0.96));
-      box-shadow: 0 0 34px rgba(36, 70, 255, 0.35);
-    }
+.game-shell {
+position: relative;
+width: min(100%, 620px);
+display: grid;
+place-items: center;
+padding: 10px;
+border: 1px solid rgba(84, 168, 255, 0.55);
+border-radius: 10px;
+background: linear-gradient(180deg, rgba(4, 5, 18, 0.96), rgba(2, 3, 11, 0.96));
+box-shadow: 0 0 34px rgba(36, 70, 255, 0.35);
+}
 
-    canvas {
-      width: min(100%, 504px);
-      height: auto;
-      display: block;
-      background: #000;
-      border-radius: 6px;
-      image-rendering: auto;
-    }
+canvas {
+width: min(100%, 504px);
+height: auto;
+display: block;
+background: #000;
+border-radius: 6px;
+image-rendering: auto;
+}
 
-    .help {
-      margin: 0;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-      font-size: 14px;
-    }
+.help {
+margin: 0;
+color: var(--muted);
+text-align: center;
+line-height: 1.5;
+font-size: 14px;
+}
 
-    .touch-pad {
-      display: none;
-      grid-template-columns: repeat(3, 46px);
-      gap: 6px;
-      justify-content: center;
-    }
+.touch-pad {
+display: none;
+grid-template-columns: repeat(3, 46px);
+gap: 6px;
+justify-content: center;
+}
 
-    .touch-pad button {
-      width: 46px;
-      min-height: 42px;
-      padding: 0;
-    }
+.touch-pad button {
+width: 46px;
+min-height: 42px;
+padding: 0;
+}
 
-    .touch-pad .empty {
-      visibility: hidden;
-    }
+.touch-pad .empty {
+visibility: hidden;
+}
 
-    @media (max-width: 620px) {
-      main {
-        padding: 10px;
-      }
+@media (max-width: 620px) {
+main {
+padding: 10px;
+}
 
-      .marquee {
-        align-items: stretch;
-        flex-direction: column;
-      }
+.marquee {
+align-items: stretch;
+flex-direction: column;
+}
 
-      .actions {
-        justify-content: center;
-      }
+.actions {
+justify-content: center;
+}
 
-      .hud {
-        grid-template-columns: repeat(2, 1fr);
-      }
+.hud {
+grid-template-columns: repeat(2, 1fr);
+}
 
-      .hud-item:last-child {
-        grid-column: span 2;
-      }
+.hud-item:last-child {
+grid-column: span 2;
+}
 
-      .touch-pad {
-        display: grid;
-      }
-    }
-  </style>
+.touch-pad {
+display: grid;
+}
+}
+</style>
 </head>
 <body>
-  <main>
-    <section class="marquee" aria-label="Commandes principales">
-      <div class="brand">PACMAN ARCADE</div>
-      <div class="actions">
-        <button id="startBtn" type="button">Jouer</button>
-        <button id="pauseBtn" type="button">Pause</button>
-        <button id="musicBtn" type="button">Musique</button>
-        <button id="songBtn" type="button">Chanson 1984</button>
-        <button id="restartBtn" type="button">Redémarrer</button>
-      </div>
-    </section>
-
-    <section class="hud" aria-label="Tableau de score">
-      <div class="hud-item"><span>Score</span><strong id="score">0</strong></div>
-      <div class="hud-item"><span>Record</span><strong id="best">0</strong></div>
-      <div class="hud-item"><span>Niveau</span><strong id="level">1</strong></div>
-      <div class="hud-item"><span>Vies</span><strong id="lives">3</strong></div>
-      <div class="hud-item"><span>Restants</span><strong id="remaining">0</strong></div>
-    </section>
-
-    <section class="game-shell">
-      <canvas id="game" aria-label="Jeu Pacman"></canvas>
-    </section>
-
-    <p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
-
-    <section class="touch-pad" aria-label="Contrôles tactiles">
-      <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="up" type="button">Haut</button>
-      <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="left" type="button">Gauche</button>
-      <button data-dir="down" type="button">Bas</button>
-      <button data-dir="right" type="button">Droite</button>
-    </section>
-  </main>
-
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const scoreEl = document.getElementById("score");
-    const bestEl = document.getElementById("best");
-    const levelEl = document.getElementById("level");
-    const livesEl = document.getElementById("lives");
-    const remainingEl = document.getElementById("remaining");
-    const startBtn = document.getElementById("startBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const musicBtn = document.getElementById("musicBtn");
-    const songBtn = document.getElementById("songBtn");
-    const restartBtn = document.getElementById("restartBtn");
-
-    const layout = [
-      "#####################",
-      "#.........#.........#",
-      "#.###.###.#.###.###.#",
-      "#o# #.#     #.# # #o#",
-      "#.###.#.#####.#.###.#",
-      "#...................#",
-      "#.###.#.#####.#.###.#",
-      "#.....#...#...#.....#",
-      "#####.### # ###.#####",
-      "    #.#       #.#    ",
-      "#####.# ## ## #.#####",
-      "     .  #   #  .     ",
-      "#####.# ##### #.#####",
-      "    #.#       #.#    ",
-      "#####.# ##### #.#####",
-      "#.........#.........#",
-      "#.###.###.#.###.###.#",
-      "#o..#.....P.....#..o#",
-      "###.#.#.#####.#.#.###",
-      "#.....#...#...#.....#",
-      "#.#######.#.#######.#",
-      "#...................#",
-      "#####################"
-    ];
-
-    const rows = layout.length;
-    const cols = layout[0].length;
-    const tile = 24;
-    const dirs = {
-      up: { x: 0, y: -1, angle: Math.PI * 1.5 },
-      right: { x: 1, y: 0, angle: 0 },
-      down: { x: 0, y: 1, angle: Math.PI / 2 },
-      left: { x: -1, y: 0, angle: Math.PI }
-    };
-    const opposite = { up: "down", down: "up", left: "right", right: "left" };
-    const ghostHome = { x: 10, y: 11 };
-    const pacStart = { x: 10, y: 17 };
-    const dirNames = Object.keys(dirs);
-    const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
-    const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
-    const fruits = [
-      { name: "Cerise", points: 100, color: "#ff4f5e" },
-      { name: "Fraise", points: 300, color: "#ff5f7a" },
-      { name: "Orange", points: 500, color: "#ffad43" },
-      { name: "Pomme", points: 700, color: "#7dff5e" },
-      { name: "Melon", points: 1000, color: "#8dff9e" },
-      { name: "Galaxian", points: 2000, color: "#4de7ff" },
-      { name: "Cloche", points: 3000, color: "#ffed4a" },
-      { name: "Clé", points: 5000, color: "#f6f7ff" }
-    ];
-
-    canvas.width = cols * tile;
-    canvas.height = rows * tile;
-
-    const mazeCanvas = document.createElement("canvas");
-    const mazeCtx = mazeCanvas.getContext("2d");
-    mazeCanvas.width = canvas.width;
-    mazeCanvas.height = canvas.height;
-
-    let pellets = new Set();
-    let powers = new Set();
-    let score = 0;
-    let best = Number(localStorage.getItem("pacmanBest") || 0);
-    let level = 1;
-    let lives = 3;
-    let gameState = "title";
-    let stateUntil = 0;
-    let pacman;
-    let ghosts = [];
-    let floaters = [];
-    let lastPlayerMove = 0;
-    let lastGhostMove = 0;
-    let audioCtx;
-    let musicTimer;
-    let musicEnabled = localStorage.getItem("pacmanMusic") === "1";
-    let musicStep = 0;
-    let pelletStep = 0;
-    let lastBumpSound = 0;
-    let dyingUntil = 0;
-    let fruit = null;
-    let nextFruitAt = 0;
-    let nextLifeAt = 10000;
-    let particles = [];
-
-    function actor(x, y, dir, color, name) {
-      return { x, y, dir, nextDir: dir, color, name, frightened: 0, eaten: 0 };
-    }
-
-    function cellAt(x, y) {
-      return layout[y]?.[(x + cols) % cols] || "#";
-    }
-
-    function isWall(x, y) {
-      return wallMap[y]?.[(x + cols) % cols] ?? true;
-    }
-
-    function key(x, y) {
-      return y * cols + ((x + cols) % cols);
-    }
-
-    function keyX(dotKey) {
-      return dotKey % cols;
-    }
-
-    function keyY(dotKey) {
-      return Math.floor(dotKey / cols);
-    }
-
-    function remainingDots() {
-      return pellets.size + powers.size;
-    }
-
-    function playerDelay() {
-      return Math.max(112, 170 - (level - 1) * 8);
-    }
-
-    function ghostDelay() {
-      return Math.max(118, 230 - (level - 1) * 10);
-    }
-
-    function updateHud() {
-      scoreEl.textContent = score;
-      bestEl.textContent = best;
-      levelEl.textContent = level;
-      livesEl.textContent = lives;
-      remainingEl.textContent = remainingDots();
-    }
-
-    function startAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === "suspended") audioCtx.resume();
-    }
-
-    function beep(freq, duration, type = "square", volume = 0.04, delay = 0, endFreq = freq) {
-      if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      const start = audioCtx.currentTime + delay;
-      const end = start + duration;
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, start);
-      if (endFreq !== freq) osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), end);
-      gain.gain.setValueAtTime(0.001, start);
-      gain.gain.linearRampToValueAtTime(volume, start + 0.006);
-      gain.gain.exponentialRampToValueAtTime(0.001, end);
-      osc.connect(gain).connect(audioCtx.destination);
-      osc.start(start);
-      osc.stop(end + 0.02);
-    }
-
-    function noise(duration, volume = 0.035, delay = 0) {
-      if (!audioCtx) return;
-      const sampleCount = Math.floor(audioCtx.sampleRate * duration);
-      const buffer = audioCtx.createBuffer(1, sampleCount, audioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < sampleCount; i += 1) {
-        data[i] = (Math.random() * 2 - 1) * (1 - i / sampleCount);
-      }
-      const source = audioCtx.createBufferSource();
-      const gain = audioCtx.createGain();
-      const start = audioCtx.currentTime + delay;
-      source.buffer = buffer;
-      gain.gain.setValueAtTime(volume, start);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-      source.connect(gain).connect(audioCtx.destination);
-      source.start(start);
-    }
-
-    function playStartSound() {
-      [330, 392, 523, 659, 784].forEach((freq, index) => {
-        beep(freq, 0.075, "square", 0.034, index * 0.07);
-      });
-      beep(1046, 0.14, "triangle", 0.03, 0.36);
-    }
-
-    function playPelletSound() {
-      const freq = pelletStep % 2 === 0 ? 420 : 520;
-      pelletStep += 1;
-      beep(freq, 0.028, "square", 0.022, 0, freq * 1.18);
-    }
-
-    function playPowerSound() {
-      beep(150, 0.18, "sawtooth", 0.035, 0, 380);
-      beep(760, 0.09, "square", 0.025, 0.08, 560);
-      beep(920, 0.08, "triangle", 0.02, 0.17, 690);
-      noise(0.16, 0.018, 0.02);
-    }
-
-    function playFruitSound() {
-      [440, 554, 659, 880].forEach((freq, index) => {
-        beep(freq, 0.06, "triangle", 0.03, index * 0.05, freq * 1.06);
-      });
-    }
-
-    function playExtraLifeSound() {
-      [523, 659, 784, 1046, 1318, 1568].forEach((freq, index) => {
-        beep(freq, 0.09, "triangle", 0.035, index * 0.07);
-      });
-    }
-
-    function playGhostEatSound() {
-      beep(880, 0.08, "triangle", 0.045, 0, 1320);
-      beep(1760, 0.06, "square", 0.026, 0.075, 1200);
-      noise(0.08, 0.015, 0.025);
-    }
-
-    function playDeathSound() {
-      [330, 294, 247, 196, 147, 110].forEach((freq, index) => {
-        beep(freq, 0.105, "sawtooth", 0.04, index * 0.085, Math.max(70, freq * 0.72));
-      });
-      noise(0.22, 0.03, 0.28);
-    }
-
-    function playLevelClearSound() {
-      [523, 659, 784, 1046, 1318].forEach((freq, index) => {
-        beep(freq, 0.09, index % 2 ? "triangle" : "square", 0.032, index * 0.09);
-      });
-      beep(1568, 0.18, "triangle", 0.028, 0.46);
-    }
-
-    function playPauseSound(paused) {
-      beep(paused ? 440 : 660, 0.055, "triangle", 0.025, 0, paused ? 330 : 880);
-    }
-
-    function playBumpSound() {
-      const now = performance.now();
-      if (now - lastBumpSound < 120) return;
-      lastBumpSound = now;
-      beep(95, 0.045, "sawtooth", 0.018, 0, 70);
-      noise(0.035, 0.012);
-    }
-
-    function playMusicStep() {
-      if (!musicEnabled || !audioCtx) return;
-      const melody = [392, 523, 659, 523, 440, 587, 740, 587, 392, 494, 622, 494, 330, 440, 554, 440];
-      const bass = [98, 98, 131, 131, 110, 110, 147, 147];
-      beep(melody[musicStep % melody.length], 0.075, "square", 0.018);
-      if (musicStep % 2 === 0) beep(bass[(musicStep / 2) % bass.length], 0.09, "triangle", 0.016);
-      musicStep += 1;
-    }
-
-    function updateMusicButton() {
-      musicBtn.textContent = musicEnabled ? "Musique ON" : "Musique";
-    }
-
-    function toggleMusic() {
-      startAudio();
-      musicEnabled = !musicEnabled;
-      localStorage.setItem("pacmanMusic", musicEnabled ? "1" : "0");
-      if (musicEnabled && !musicTimer) {
-        musicTimer = setInterval(playMusicStep, 155);
-      }
-      if (!musicEnabled && musicTimer) {
-        clearInterval(musicTimer);
-        musicTimer = undefined;
-      }
-      updateMusicButton();
-    }
-
-    function award(points, x, y, label) {
-      score += points;
-      if (score > best) {
-        best = score;
-        localStorage.setItem("pacmanBest", String(best));
-      }
-      floaters.push({
-        x,
-        y,
-        text: label || `+${points}`,
-        born: performance.now(),
-        ttl: 780,
-        color: points >= 200 ? "#4de7ff" : "#fff6b3"
-      });
-      if (score >= nextLifeAt) {
-        lives += 1;
-        nextLifeAt += 10000;
-        floaters.push({
-          x,
-          y,
-          text: "+1 VIE",
-          born: performance.now(),
-          ttl: 1300,
-          color: "#ff4fa3"
-        });
-        playExtraLifeSound();
-      }
-      updateHud();
-    }
-
-    function buildLevel() {
-      pellets = new Set();
-      powers = new Set();
-      layout.forEach((row, y) => {
-        [...row].forEach((cell, x) => {
-          if (cell === ".") pellets.add(key(x, y));
-          if (cell === "o") powers.add(key(x, y));
-        });
-      });
-
-      pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
-      ghosts = [
-        actor(10, 9, "left", "#ff4f5e", "blinky"),
-        actor(9, 11, "up", "#4de7ff", "inky"),
-        actor(11, 11, "down", "#ff4fa3", "pinky"),
-        actor(10, 13, "right", "#ffad43", "clyde")
-      ];
-      floaters = [];
-      particles = [];
-      fruit = null;
-      nextFruitAt = performance.now() + 8000;
-      lastPlayerMove = 0;
-      lastGhostMove = 0;
-      gameState = "ready";
-      stateUntil = performance.now() + 1300;
-      updateHud();
-    }
-
-    function buildMazeCache() {
-      mazeCtx.fillStyle = "#00020a";
-      mazeCtx.fillRect(0, 0, mazeCanvas.width, mazeCanvas.height);
-
-      for (let y = 0; y < rows; y += 1) {
-        for (let x = 0; x < cols; x += 1) {
-          if (!isWall(x, y)) continue;
-          const px = x * tile;
-          const py = y * tile;
-          const glow = mazeCtx.createLinearGradient(px, py, px + tile, py + tile);
-          glow.addColorStop(0, "#1b2dbd");
-          glow.addColorStop(0.5, "#3158ff");
-          glow.addColorStop(1, "#151b84");
-          mazeCtx.fillStyle = glow;
-          mazeCtx.fillRect(px + 1, py + 1, tile - 2, tile - 2);
-          mazeCtx.strokeStyle = "rgba(94, 183, 255, 0.7)";
-          mazeCtx.lineWidth = 1;
-          mazeCtx.strokeRect(px + 3, py + 3, tile - 6, tile - 6);
-        }
-      }
-    }
-
-    function newGame() {
-      startAudio();
-      score = 0;
-      level = 1;
-      lives = 3;
-      pelletStep = 0;
-      nextLifeAt = 10000;
-      buildLevel();
-      playStartSound();
-    }
-
-    function nextLevel() {
-      level += 1;
-      buildLevel();
-      playStartSound();
-    }
-
-    function canMove(unit, dirName) {
-      const dir = dirs[dirName];
-      return !isWall(unit.x + dir.x, unit.y + dir.y);
-    }
-
-    function moveUnit(unit) {
-      if (canMove(unit, unit.nextDir)) unit.dir = unit.nextDir;
-      if (!canMove(unit, unit.dir)) return false;
-      const dir = dirs[unit.dir];
-      unit.x = (unit.x + dir.x + cols) % cols;
-      unit.y += dir.y;
-      return true;
-    }
-
-    function eatDots() {
-      const dotKey = key(pacman.x, pacman.y);
-      if (pellets.delete(dotKey)) {
-        award(10, pacman.x, pacman.y);
-        playPelletSound();
-      }
-      if (powers.delete(dotKey)) {
-        award(50, pacman.x, pacman.y, "+50 POWER");
-        ghosts.forEach((ghost) => {
-          ghost.frightened = 34 + level * 2;
-        });
-        spawnParticles(pacman.x, pacman.y, "#fff3a0", 20);
-        playPowerSound();
-      }
-      if (fruit && pacman.x === fruit.x && pacman.y === fruit.y) {
-        award(fruit.points, fruit.x, fruit.y, `${fruits[fruit.type].name.toUpperCase()} +${fruit.points}`);
-        spawnParticles(fruit.x, fruit.y, fruit.color, 22);
-        playFruitSound();
-        fruit = null;
-        nextFruitAt = performance.now() + 9000;
-      }
-      if (remainingDots() === 0 && gameState === "playing") {
-        gameState = "levelClear";
-        stateUntil = performance.now() + 1900;
-        award(500, pacman.x, pacman.y, "NIVEAU TERMINE");
-        playLevelClearSound();
-      }
-    }
-
-    function chooseGhostDir(ghost) {
-      const options = [];
-      for (const dirName of dirNames) {
-        if (dirName !== opposite[ghost.dir] && canMove(ghost, dirName)) options.push(dirName);
-      }
-      if (options.length === 0) return opposite[ghost.dir];
-
-      if (ghost.frightened > 0) {
-        return options[Math.floor(Math.random() * options.length)];
-      }
-
-      const scatter = ghost.name === "clyde" && Math.random() < 0.35;
-      let bestDir = options[0];
-      let bestDist = scatter ? -Infinity : Infinity;
-
-      for (const dirName of options) {
-        const dir = dirs[dirName];
-        const dist = Math.abs(ghost.x + dir.x - pacman.x) + Math.abs(ghost.y + dir.y - pacman.y);
-        if ((scatter && dist > bestDist) || (!scatter && dist < bestDist)) {
-          bestDist = dist;
-          bestDir = dirName;
-        }
-      }
-
-      return bestDir;
-    }
-
-    function moveGhosts() {
-      ghosts.forEach((ghost) => {
-        if (ghost.eaten > 0) {
-          ghost.eaten -= 1;
-          if (ghost.eaten === 0) {
-            ghost.x = ghostHome.x;
-            ghost.y = ghostHome.y;
-            ghost.dir = "up";
-            ghost.nextDir = "up";
-          }
-          return;
-        }
-        ghost.nextDir = chooseGhostDir(ghost);
-        moveUnit(ghost);
-        if (ghost.frightened > 0) ghost.frightened -= 1;
-      });
-    }
-
-    function resetAfterHit() {
-      pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
-      ghosts.forEach((ghost, index) => {
-        ghost.x = homeSpots[index].x;
-        ghost.y = homeSpots[index].y;
-        ghost.dir = ["left", "up", "down", "right"][index];
-        ghost.nextDir = ghost.dir;
-        ghost.frightened = 0;
-        ghost.eaten = 0;
-      });
-      gameState = "ready";
-      stateUntil = performance.now() + 1100;
-      lastPlayerMove = 0;
-      lastGhostMove = 0;
-    }
-
-    function collide() {
-      ghosts.forEach((ghost) => {
-        if (ghost.eaten > 0 || ghost.x !== pacman.x || ghost.y !== pacman.y) return;
-        if (ghost.frightened > 0) {
-          ghost.eaten = 9;
-          ghost.frightened = 0;
-          award(200, ghost.x, ghost.y, "+200");
-          spawnParticles(ghost.x, ghost.y, "#4de7ff", 18);
-          playGhostEatSound();
-          return;
-        }
-
-        lives -= 1;
-        updateHud();
-        playDeathSound();
-        gameState = "dying";
-        dyingUntil = performance.now() + 1400;
-      });
-    }
-
-    function setDirection(dirName) {
-      if (!dirs[dirName]) return;
-      startAudio();
-      if (gameState === "title" || gameState === "gameOver") {
-        newGame();
-      }
-      if (gameState !== "playing" && gameState !== "ready") return;
-      pacman.nextDir = dirName;
-      if (gameState === "playing" && canMove(pacman, dirName)) {
-        pacman.dir = dirName;
-        lastPlayerMove = performance.now() - playerDelay();
-      } else if (gameState === "playing") {
-        playBumpSound();
-      }
-    }
-
-    function togglePause() {
-      if (gameState === "playing") {
-        gameState = "paused";
-        playPauseSound(true);
-      } else if (gameState === "paused") {
-        gameState = "playing";
-        lastPlayerMove = performance.now();
-        lastGhostMove = performance.now();
-        playPauseSound(false);
-      }
-      draw();
-    }
-
-    function drawMaze() {
-      ctx.drawImage(mazeCanvas, 0, 0);
-    }
-
-    function drawDots(now) {
-      ctx.fillStyle = "#fff6b3";
-      pellets.forEach((dot) => {
-        const x = keyX(dot);
-        const y = keyY(dot);
-        ctx.beginPath();
-        ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      const pulse = 1 + Math.sin(now / 120) * 0.18;
-      ctx.fillStyle = "#fff3a0";
-      powers.forEach((dot) => {
-        const x = keyX(dot);
-        const y = keyY(dot);
-        ctx.beginPath();
-        ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 6 * pulse, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-
-    function drawPacman(now) {
-      const cx = pacman.x * tile + tile / 2;
-      const cy = pacman.y * tile + tile / 2;
-
-      if (gameState === "dying") {
-        const t = Math.min(1, (now - (dyingUntil - 1400)) / 1400);
-        const radius = tile * 0.42 * (1 - t * t);
-        if (radius > 0.5) {
-          ctx.fillStyle = "#ffed4a";
-          ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
-          ctx.shadowBlur = 14;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        }
-        return;
-      }
-
-      const mouth = Math.sin(now / 70) * 0.18 + 0.32;
-      const angle = dirs[pacman.dir].angle;
-      ctx.fillStyle = "#ffed4a";
-      ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
-      ctx.shadowBlur = 14;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, tile * 0.42, angle + mouth, angle + Math.PI * 2 - mouth);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowBlur = 0;
-    }
-
-    function drawGhost(ghost, now) {
-      if (ghost.eaten > 0) return;
-      const px = ghost.x * tile;
-      const py = ghost.y * tile;
-      const wobble = Math.sin(now / 110 + ghost.x) * 1.5;
-      const body = ghost.frightened > 0 ? (ghost.frightened < 10 && Math.floor(now / 120) % 2 ? "#fff" : "#243fff") : ghost.color;
-
-      ctx.fillStyle = body;
-      ctx.shadowColor = body;
-      ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.arc(px + tile / 2, py + tile * 0.42 + wobble, tile * 0.36, Math.PI, 0);
-      ctx.lineTo(px + tile * 0.86, py + tile * 0.84);
-      ctx.lineTo(px + tile * 0.68, py + tile * 0.72);
-      ctx.lineTo(px + tile * 0.5, py + tile * 0.84);
-      ctx.lineTo(px + tile * 0.32, py + tile * 0.72);
-      ctx.lineTo(px + tile * 0.14, py + tile * 0.84);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowBlur = 0;
-
-      const look = dirs[ghost.dir];
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(px + tile * 0.37, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
-      ctx.arc(px + tile * 0.63, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#081238";
-      ctx.beginPath();
-      ctx.arc(px + tile * 0.37 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
-      ctx.arc(px + tile * 0.63 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function drawFloaters(now) {
-      floaters = floaters.filter((item) => now - item.born < item.ttl);
-      ctx.textAlign = "center";
-      ctx.font = "bold 12px Consolas, Monaco, monospace";
-      floaters.forEach((item) => {
-        const t = (now - item.born) / item.ttl;
-        ctx.globalAlpha = 1 - t;
-        ctx.fillStyle = item.color;
-        ctx.fillText(item.text, item.x * tile + tile / 2, item.y * tile + tile / 2 - t * 22);
-      });
-      ctx.globalAlpha = 1;
-    }
-
-    function spawnParticles(px, py, color, count = 16) {
-      const cx = px * tile + tile / 2;
-      const cy = py * tile + tile / 2;
-      for (let i = 0; i < count; i += 1) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.8 + Math.random() * 2.6;
-        particles.push({
-          x: cx,
-          y: cy,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.8,
-          life: 0,
-          ttl: 420 + Math.random() * 300
-        });
-      }
-      if (particles.length > 260) particles.splice(0, particles.length - 260);
-    }
-
-    function updateParticles() {
-      particles = particles.filter((p) => p.life < p.ttl);
-      for (const p of particles) {
-        p.life += 16.67;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= 0.94;
-        p.vy = p.vy * 0.94 + 0.12;
-      }
-    }
-
-    function drawParticles() {
-      for (const p of particles) {
-        const t = p.life / p.ttl;
-        ctx.globalAlpha = Math.max(0, 1 - t);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 0.5 + 2.4 * (1 - t), 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-
-    function drawFruit(now) {
-      if (!fruit) return;
-      if (now > fruit.expires) {
-        fruit = null;
-        nextFruitAt = now + 8000;
-        return;
-      }
-      if (fruit.expires - now < 2500 && Math.floor(now / 140) % 2) return;
-      const px = fruit.x * tile + tile / 2;
-      const py = fruit.y * tile + tile / 2;
-      const pulse = 1 + Math.sin(now / 150) * 0.12;
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.scale(pulse, pulse);
-      ctx.fillStyle = fruit.color;
-      ctx.shadowColor = fruit.color;
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.arc(0, -2, tile * 0.3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "#7dff8a";
-      ctx.beginPath();
-      ctx.ellipse(0, -tile * 0.38, 2.5, 6, 0.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-      ctx.textAlign = "center";
-      ctx.font = "bold 10px Consolas, Monaco, monospace";
-      ctx.fillStyle = "#f6f7ff";
-      ctx.fillText(String(fruit.points), px, py + tile * 0.6);
-    }
-
-    function drawLives() {
-      for (let i = 0; i < lives; i += 1) {
-        const cx = 14 + i * 18;
-        const cy = canvas.height - 9;
-        ctx.fillStyle = "#ffed4a";
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, 7, 0.35, Math.PI * 2 - 0.35);
-        ctx.closePath();
-        ctx.fill();
-      }
-    }
-
-    function overlay(title, subtitle) {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#ffed4a";
-      ctx.textAlign = "center";
-      ctx.font = "bold 36px Consolas, Monaco, monospace";
-      ctx.shadowColor = "rgba(255, 237, 74, 0.8)";
-      ctx.shadowBlur = 16;
-      ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 16);
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "#f6f7ff";
-      ctx.font = "16px Consolas, Monaco, monospace";
-      ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
-    }
-
-    function draw(now = performance.now()) {
-      drawMaze();
-      drawDots(now);
-      drawFruit(now);
-      if (pacman) drawPacman(now);
-      ghosts.forEach((ghost) => drawGhost(ghost, now));
-      drawParticles();
-      drawFloaters(now);
-      drawLives();
-
-      if (gameState === "title") overlay("PACMAN", `Record ${best} — Entrée, Espace ou Jouer`);
-      if (gameState === "ready") overlay("READY!", "Prépare ton virage");
-      if (gameState === "paused") overlay("PAUSE", "P pour reprendre");
-      if (gameState === "levelClear") overlay("NIVEAU TERMINE", "Niveau suivant...");
-      if (gameState === "gameOver") overlay("GAME OVER", "Entrée, Espace ou Jouer pour recommencer");
-    }
-
-    function update(now) {
-      updateParticles();
-
-      if (gameState === "ready" && now >= stateUntil) {
-        gameState = "playing";
-        lastPlayerMove = now;
-        lastGhostMove = now;
-      }
-
-      if (gameState === "dying" && now >= dyingUntil) {
-        if (lives <= 0) {
-          gameState = "gameOver";
-        } else {
-          resetAfterHit();
-        }
-      }
-
-      if (gameState === "levelClear" && now >= stateUntil) {
-        nextLevel();
-      }
-
-      if (gameState === "playing") {
-        if (!fruit && now >= nextFruitAt) {
-          const fi = Math.min(level - 1, fruits.length - 1);
-          fruit = {
-            x: 10,
-            y: 11,
-            type: fi,
-            points: fruits[fi].points,
-            color: fruits[fi].color,
-            born: now,
-            expires: now + 9000
-          };
-          playFruitSound();
-        }
-      }
-
-      if (gameState === "playing" && now - lastPlayerMove >= playerDelay()) {
-        moveUnit(pacman);
-        eatDots();
-        if (gameState === "playing") collide();
-        lastPlayerMove = now;
-      }
-
-      if (gameState === "playing" && now - lastGhostMove >= ghostDelay()) {
-        moveGhosts();
-        collide();
-        lastGhostMove = now;
-      }
-
-      draw(now);
-      requestAnimationFrame(update);
-    }
-
-    document.addEventListener("keydown", (event) => {
-      const map = {
-        ArrowUp: "up",
-        w: "up",
-        z: "up",
-        ArrowRight: "right",
-        d: "right",
-        ArrowDown: "down",
-        s: "down",
-        ArrowLeft: "left",
-        a: "left",
-        q: "left"
-      };
-      const dir = map[event.key] || map[event.key.toLowerCase()];
-      if (dir) {
-        event.preventDefault();
-        setDirection(dir);
-        return;
-      }
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        if (gameState === "title" || gameState === "gameOver") newGame();
-      }
-      if (event.key.toLowerCase() === "p") togglePause();
-      if (event.key.toLowerCase() === "r") newGame();
-    });
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden && gameState === "playing") {
-        gameState = "paused";
-        lastPlayerMove = performance.now();
-        lastGhostMove = performance.now();
-        draw();
-      }
-    });
-
-    startBtn.addEventListener("click", newGame);
-    restartBtn.addEventListener("click", newGame);
-    pauseBtn.addEventListener("click", togglePause);
-    musicBtn.addEventListener("click", toggleMusic);
-    songBtn.addEventListener("click", () => {
-      window.open("https://www.youtube.com/watch?v=kJp3jISVNY0", "_blank", "noopener");
-    });
-    document.querySelectorAll("[data-dir]").forEach((button) => {
-      button.addEventListener("click", () => setDirection(button.dataset.dir));
-    });
-
-    buildMazeCache();
-    buildLevel();
-    gameState = "title";
-    updateHud();
-    updateMusicButton();
-    if (musicEnabled) musicTimer = setInterval(playMusicStep, 155);
-    requestAnimationFrame(update);
-  </script>
+<main>
+<section class="marquee" aria-label="Commandes principales">
+<div class="brand">PACMAN ARCADE</div>
+<div class="actions">
+<button id="startBtn" type="button">Jouer</button>
+<button id="pauseBtn" type="button">Pause</button>
+<button id="musicBtn" type="button">Musique</button>
+<button id="songBtn" type="button">Chanson 1984</button>
+<button id="restartBtn" type="button">Redémarrer</button>
+</div>
+</section>
+
+<section class="hud" aria-label="Tableau de score">
+<div class="hud-item"><span>Score</span><strong id="score">0</strong></div>
+<div class="hud-item"><span>Record</span><strong id="best">0</strong></div>
+<div class="hud-item"><span>Niveau</span><strong id="level">1</strong></div>
+<div class="hud-item"><span>Vies</span><strong id="lives">3</strong></div>
+<div class="hud-item"><span>Restants</span><strong id="remaining">0</strong></div>
+</section>
+
+<section class="game-shell">
+<canvas id="game" aria-label="Jeu Pacman"></canvas>
+</section>
+
+<p class="help">Flèches, WASD ou ZQSD pour bouger. Entrée/Espace pour jouer, P pour pause, R pour redémarrer.</p>
+
+<section class="touch-pad" aria-label="Contrôles tactiles">
+<button class="empty" tabindex="-1" type="button"></button>
+<button data-dir="up" type="button">Haut</button>
+<button class="empty" tabindex="-1" type="button"></button>
+<button data-dir="left" type="button">Gauche</button>
+<button data-dir="down" type="button">Bas</button>
+<button data-dir="right" type="button">Droite</button>
+</section>
+</main>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
+const levelEl = document.getElementById("level");
+const livesEl = document.getElementById("lives");
+const remainingEl = document.getElementById("remaining");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const musicBtn = document.getElementById("musicBtn");
+const songBtn = document.getElementById("songBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+const layout = [
+"#####################",
+"#.........#.........#",
+"#.###.###.#.###.###.#",
+"#o# #.# #.# # #o#",
+"#.###.#.#####.#.###.#",
+"#...................#",
+"#.###.#.#####.#.###.#",
+"#.....#...#...#.....#",
+"#####.### # ###.#####",
+" #.# #.# ",
+"#####.# ## ## #.#####",
+" . # # . ",
+"#####.# ##### #.#####",
+" #.# #.# ",
+"#####.# ##### #.#####",
+"#.........#.........#",
+"#.###.###.#.###.###.#",
+"#o..#.....P.....#..o#",
+"###.#.#.#####.#.#.###",
+"#.....#...#...#.....#",
+"#.#######.#.#######.#",
+"#...................#",
+"#####################"
+];
+
+const rows = layout.length;
+const cols = layout[0].length;
+const tile = 24;
+const dirs = {
+up: { x: 0, y: -1, angle: Math.PI * 1.5 },
+right: { x: 1, y: 0, angle: 0 },
+down: { x: 0, y: 1, angle: Math.PI / 2 },
+left: { x: -1, y: 0, angle: Math.PI }
+};
+const opposite = { up: "down", down: "up", left: "right", right: "left" };
+const ghostHome = { x: 10, y: 11 };
+const pacStart = { x: 10, y: 17 };
+const dirNames = Object.keys(dirs);
+const wallMap = layout.map((row) => [...row].map((cell) => cell === "#"));
+const homeSpots = [{ x: 10, y: 9 }, { x: 9, y: 11 }, { x: 11, y: 11 }, { x: 10, y: 13 }];
+const fruits = [
+{ name: "Cerise", points: 100, color: "#ff4f5e" },
+{ name: "Fraise", points: 300, color: "#ff5f7a" },
+{ name: "Orange", points: 500, color: "#ffad43" },
+{ name: "Pomme", points: 700, color: "#7dff5e" },
+{ name: "Melon", points: 1000, color: "#8dff9e" },
+{ name: "Galaxian", points: 2000, color: "#4de7ff" },
+{ name: "Cloche", points: 3000, color: "#ffed4a" },
+{ name: "Clé", points: 5000, color: "#f6f7ff" }
+];
+
+canvas.width = cols * tile;
+canvas.height = rows * tile;
+
+const mazeCanvas = document.createElement("canvas");
+const mazeCtx = mazeCanvas.getContext("2d");
+mazeCanvas.width = canvas.width;
+mazeCanvas.height = canvas.height;
+
+function loadStorage(key, fallback) {
+try {
+return localStorage.getItem(key) ?? fallback;
+} catch (err) {
+return fallback;
+}
+}
+
+function saveStorage(key, value) {
+try {
+localStorage.setItem(key, value);
+} catch (err) {
+/* ignore storage errors (private browsing, disabled storage, etc.) */
+}
+}
+
+let pellets = new Set();
+let powers = new Set();
+let score = 0;
+let best = Number(loadStorage("pacmanBest", "0"));
+let level = 1;
+let lives = 3;
+let gameState = "title";
+let stateUntil = 0;
+let pacman;
+let ghosts = [];
+let floaters = [];
+let lastPlayerMove = 0;
+let lastGhostMove = 0;
+let audioCtx;
+let musicTimer;
+let musicEnabled = loadStorage("pacmanMusic", "0") === "1";
+let musicStep = 0;
+let pelletStep = 0;
+let lastBumpSound = 0;
+let dyingUntil = 0;
+let fruit = null;
+let nextFruitAt = 0;
+let nextLifeAt = 10000;
+let particles = [];
+
+function actor(x, y, dir, color, name) {
+return { x, y, dir, nextDir: dir, color, name, frightened: 0, eaten: 0 };
+}
+
+function isWall(x, y) {
+return wallMap[y]?.[(x + cols) % cols] ?? true;
+}
+
+function key(x, y) {
+return y * cols + ((x + cols) % cols);
+}
+
+function keyX(dotKey) {
+return dotKey % cols;
+}
+
+function keyY(dotKey) {
+return Math.floor(dotKey / cols);
+}
+
+function remainingDots() {
+return pellets.size + powers.size;
+}
+
+function playerDelay() {
+return Math.max(112, 170 - (level - 1) * 8);
+}
+
+function ghostDelay() {
+return Math.max(118, 230 - (level - 1) * 10);
+}
+
+function updateHud() {
+scoreEl.textContent = score;
+bestEl.textContent = best;
+levelEl.textContent = level;
+livesEl.textContent = lives;
+remainingEl.textContent = remainingDots();
+}
+
+function startAudio() {
+try {
+if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+if (audioCtx.state === "suspended") audioCtx.resume();
+} catch (err) {
+/* Web Audio unavailable: game stays playable without sound */
+}
+}
+
+function beep(freq, duration, type = "square", volume = 0.04, delay = 0, endFreq = freq) {
+if (!audioCtx) return;
+const osc = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+const start = audioCtx.currentTime + delay;
+const end = start + duration;
+osc.type = type;
+osc.frequency.setValueAtTime(freq, start);
+if (endFreq !== freq) osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), end);
+gain.gain.setValueAtTime(0.001, start);
+gain.gain.linearRampToValueAtTime(volume, start + 0.006);
+gain.gain.exponentialRampToValueAtTime(0.001, end);
+osc.connect(gain).connect(audioCtx.destination);
+osc.start(start);
+osc.stop(end + 0.02);
+}
+
+function noise(duration, volume = 0.035, delay = 0) {
+if (!audioCtx) return;
+const sampleCount = Math.floor(audioCtx.sampleRate * duration);
+const buffer = audioCtx.createBuffer(1, sampleCount, audioCtx.sampleRate);
+const data = buffer.getChannelData(0);
+for (let i = 0; i < sampleCount; i += 1) {
+data[i] = (Math.random() * 2 - 1) * (1 - i / sampleCount);
+}
+const source = audioCtx.createBufferSource();
+const gain = audioCtx.createGain();
+const start = audioCtx.currentTime + delay;
+source.buffer = buffer;
+gain.gain.setValueAtTime(volume, start);
+gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+source.connect(gain).connect(audioCtx.destination);
+source.start(start);
+}
+
+function playStartSound() {
+[330, 392, 523, 659, 784].forEach((freq, index) => {
+beep(freq, 0.075, "square", 0.034, index * 0.07);
+});
+beep(1046, 0.14, "triangle", 0.03, 0.36);
+}
+
+function playPelletSound() {
+const freq = pelletStep % 2 === 0 ? 420 : 520;
+pelletStep += 1;
+beep(freq, 0.028, "square", 0.022, 0, freq * 1.18);
+}
+
+function playPowerSound() {
+beep(150, 0.18, "sawtooth", 0.035, 0, 380);
+beep(760, 0.09, "square", 0.025, 0.08, 560);
+beep(920, 0.08, "triangle", 0.02, 0.17, 690);
+noise(0.16, 0.018, 0.02);
+}
+
+function playFruitSound() {
+[440, 554, 659, 880].forEach((freq, index) => {
+beep(freq, 0.06, "triangle", 0.03, index * 0.05, freq * 1.06);
+});
+}
+
+function playExtraLifeSound() {
+[523, 659, 784, 1046, 1318, 1568].forEach((freq, index) => {
+beep(freq, 0.09, "triangle", 0.035, index * 0.07);
+});
+}
+
+function playGhostEatSound() {
+beep(880, 0.08, "triangle", 0.045, 0, 1320);
+beep(1760, 0.06, "square", 0.026, 0.075, 1200);
+noise(0.08, 0.015, 0.025);
+}
+
+function playDeathSound() {
+[330, 294, 247, 196, 147, 110].forEach((freq, index) => {
+beep(freq, 0.105, "sawtooth", 0.04, index * 0.085, Math.max(70, freq * 0.72));
+});
+noise(0.22, 0.03, 0.28);
+}
+
+function playLevelClearSound() {
+[523, 659, 784, 1046, 1318].forEach((freq, index) => {
+beep(freq, 0.09, index % 2 ? "triangle" : "square", 0.032, index * 0.09);
+});
+beep(1568, 0.18, "triangle", 0.028, 0.46);
+}
+
+function playPauseSound(paused) {
+beep(paused ? 440 : 660, 0.055, "triangle", 0.025, 0, paused ? 330 : 880);
+}
+
+function playBumpSound() {
+const now = performance.now();
+if (now - lastBumpSound < 120) return;
+lastBumpSound = now;
+beep(95, 0.045, "sawtooth", 0.018, 0, 70);
+noise(0.035, 0.012);
+}
+
+function playMusicStep() {
+if (!musicEnabled || !audioCtx) return;
+const melody = [392, 523, 659, 523, 440, 587, 740, 587, 392, 494, 622, 494, 330, 440, 554, 440];
+const bass = [98, 98, 131, 131, 110, 110, 147, 147];
+beep(melody[musicStep % melody.length], 0.075, "square", 0.018);
+if (musicStep % 2 === 0) beep(bass[(musicStep / 2) % bass.length], 0.09, "triangle", 0.016);
+musicStep += 1;
+}
+
+function updateMusicButton() {
+musicBtn.textContent = musicEnabled ? "Musique ON" : "Musique";
+}
+
+function toggleMusic() {
+startAudio();
+musicEnabled = !musicEnabled;
+saveStorage("pacmanMusic", musicEnabled ? "1" : "0");
+if (musicEnabled && !musicTimer) {
+musicTimer = setInterval(playMusicStep, 155);
+}
+if (!musicEnabled && musicTimer) {
+clearInterval(musicTimer);
+musicTimer = undefined;
+}
+updateMusicButton();
+}
+
+function award(points, x, y, label) {
+score += points;
+if (score > best) {
+best = score;
+saveStorage("pacmanBest", String(best));
+}
+floaters.push({
+x,
+y,
+text: label || `+${points}`,
+born: performance.now(),
+ttl: 780,
+color: points >= 200 ? "#4de7ff" : "#fff6b3"
+});
+if (score >= nextLifeAt) {
+lives += 1;
+nextLifeAt += 10000;
+floaters.push({
+x,
+y,
+text: "+1 VIE",
+born: performance.now(),
+ttl: 1300,
+color: "#ff4fa3"
+});
+playExtraLifeSound();
+}
+updateHud();
+}
+
+function buildLevel() {
+pellets = new Set();
+powers = new Set();
+layout.forEach((row, y) => {
+[...row].forEach((cell, x) => {
+if (cell === ".") pellets.add(key(x, y));
+if (cell === "o") powers.add(key(x, y));
+});
+});
+
+pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
+ghosts = [
+actor(10, 9, "left", "#ff4f5e", "blinky"),
+actor(9, 11, "up", "#4de7ff", "inky"),
+actor(11, 11, "down", "#ff4fa3", "pinky"),
+actor(10, 13, "right", "#ffad43", "clyde")
+];
+floaters = [];
+particles = [];
+fruit = null;
+nextFruitAt = performance.now() + 8000;
+lastPlayerMove = 0;
+lastGhostMove = 0;
+gameState = "ready";
+stateUntil = performance.now() + 1300;
+updateHud();
+}
+
+function buildMazeCache() {
+mazeCtx.fillStyle = "#00020a";
+mazeCtx.fillRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
+for (let y = 0; y < rows; y += 1) {
+for (let x = 0; x < cols; x += 1) {
+if (!isWall(x, y)) continue;
+const px = x * tile;
+const py = y * tile;
+const glow = mazeCtx.createLinearGradient(px, py, px + tile, py + tile);
+glow.addColorStop(0, "#1b2dbd");
+glow.addColorStop(0.5, "#3158ff");
+glow.addColorStop(1, "#151b84");
+mazeCtx.fillStyle = glow;
+mazeCtx.fillRect(px + 1, py + 1, tile - 2, tile - 2);
+mazeCtx.strokeStyle = "rgba(94, 183, 255, 0.7)";
+mazeCtx.lineWidth = 1;
+mazeCtx.strokeRect(px + 3, py + 3, tile - 6, tile - 6);
+}
+}
+}
+
+function newGame() {
+startAudio();
+score = 0;
+level = 1;
+lives = 3;
+pelletStep = 0;
+nextLifeAt = 10000;
+buildLevel();
+playStartSound();
+}
+
+function nextLevel() {
+level += 1;
+buildLevel();
+playStartSound();
+}
+
+function canMove(unit, dirName) {
+const dir = dirs[dirName];
+return !isWall(unit.x + dir.x, unit.y + dir.y);
+}
+
+function moveUnit(unit) {
+if (canMove(unit, unit.nextDir)) unit.dir = unit.nextDir;
+if (!canMove(unit, unit.dir)) return false;
+const dir = dirs[unit.dir];
+unit.x = (unit.x + dir.x + cols) % cols;
+unit.y += dir.y;
+return true;
+}
+
+function eatDots() {
+const dotKey = key(pacman.x, pacman.y);
+if (pellets.delete(dotKey)) {
+award(10, pacman.x, pacman.y);
+playPelletSound();
+}
+if (powers.delete(dotKey)) {
+award(50, pacman.x, pacman.y, "+50 POWER");
+ghosts.forEach((ghost) => {
+ghost.frightened = 34 + level * 2;
+});
+spawnParticles(pacman.x, pacman.y, "#fff3a0", 20);
+playPowerSound();
+}
+if (fruit && pacman.x === fruit.x && pacman.y === fruit.y) {
+award(fruit.points, fruit.x, fruit.y, `${fruits[fruit.type].name.toUpperCase()} +${fruit.points}`);
+spawnParticles(fruit.x, fruit.y, fruit.color, 22);
+playFruitSound();
+fruit = null;
+nextFruitAt = performance.now() + 9000;
+}
+if (remainingDots() === 0 && gameState === "playing") {
+gameState = "levelClear";
+stateUntil = performance.now() + 1900;
+award(500, pacman.x, pacman.y, "NIVEAU TERMINE");
+playLevelClearSound();
+}
+}
+
+function chooseGhostDir(ghost) {
+const options = [];
+for (const dirName of dirNames) {
+if (dirName !== opposite[ghost.dir] && canMove(ghost, dirName)) options.push(dirName);
+}
+if (options.length === 0) return opposite[ghost.dir];
+
+if (ghost.frightened > 0) {
+return options[Math.floor(Math.random() * options.length)];
+}
+
+const scatter = ghost.name === "clyde" && Math.random() < 0.35;
+let bestDir = options[0];
+let bestDist = scatter ? -Infinity : Infinity;
+
+for (const dirName of options) {
+const dir = dirs[dirName];
+const dist = Math.abs(ghost.x + dir.x - pacman.x) + Math.abs(ghost.y + dir.y - pacman.y);
+if ((scatter && dist > bestDist) || (!scatter && dist < bestDist)) {
+bestDist = dist;
+bestDir = dirName;
+}
+}
+
+return bestDir;
+}
+
+function moveGhosts() {
+ghosts.forEach((ghost) => {
+if (ghost.eaten > 0) {
+ghost.eaten -= 1;
+if (ghost.eaten === 0) {
+ghost.x = ghostHome.x;
+ghost.y = ghostHome.y;
+ghost.dir = "up";
+ghost.nextDir = "up";
+}
+return;
+}
+ghost.nextDir = chooseGhostDir(ghost);
+moveUnit(ghost);
+if (ghost.frightened > 0) ghost.frightened -= 1;
+});
+}
+
+function resetAfterHit() {
+pacman = actor(pacStart.x, pacStart.y, "left", "#ffed4a", "pacman");
+ghosts.forEach((ghost, index) => {
+ghost.x = homeSpots[index].x;
+ghost.y = homeSpots[index].y;
+ghost.dir = ["left", "up", "down", "right"][index];
+ghost.nextDir = ghost.dir;
+ghost.frightened = 0;
+ghost.eaten = 0;
+});
+gameState = "ready";
+stateUntil = performance.now() + 1100;
+lastPlayerMove = 0;
+lastGhostMove = 0;
+}
+
+function collide() {
+ghosts.forEach((ghost) => {
+if (ghost.eaten > 0 || ghost.x !== pacman.x || ghost.y !== pacman.y) return;
+if (ghost.frightened > 0) {
+ghost.eaten = 9;
+ghost.frightened = 0;
+award(200, ghost.x, ghost.y, "+200");
+spawnParticles(ghost.x, ghost.y, "#4de7ff", 18);
+playGhostEatSound();
+return;
+}
+
+lives -= 1;
+updateHud();
+playDeathSound();
+gameState = "dying";
+dyingUntil = performance.now() + 1400;
+});
+}
+
+function setDirection(dirName) {
+if (!dirs[dirName]) return;
+startAudio();
+if (gameState === "title" || gameState === "gameOver") {
+newGame();
+}
+if (gameState !== "playing" && gameState !== "ready") return;
+pacman.nextDir = dirName;
+if (gameState === "playing" && canMove(pacman, dirName)) {
+pacman.dir = dirName;
+lastPlayerMove = performance.now() - playerDelay();
+} else if (gameState === "playing") {
+playBumpSound();
+}
+}
+
+function togglePause() {
+if (gameState === "playing") {
+gameState = "paused";
+playPauseSound(true);
+} else if (gameState === "paused") {
+gameState = "playing";
+lastPlayerMove = performance.now();
+lastGhostMove = performance.now();
+playPauseSound(false);
+}
+draw();
+}
+
+function drawMaze() {
+ctx.drawImage(mazeCanvas, 0, 0);
+}
+
+function drawDots(now) {
+ctx.fillStyle = "#fff6b3";
+pellets.forEach((dot) => {
+const x = keyX(dot);
+const y = keyY(dot);
+ctx.beginPath();
+ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 2.5, 0, Math.PI * 2);
+ctx.fill();
+});
+
+const pulse = 1 + Math.sin(now / 120) * 0.18;
+ctx.fillStyle = "#fff3a0";
+powers.forEach((dot) => {
+const x = keyX(dot);
+const y = keyY(dot);
+ctx.beginPath();
+ctx.arc(x * tile + tile / 2, y * tile + tile / 2, 6 * pulse, 0, Math.PI * 2);
+ctx.fill();
+});
+}
+
+function drawPacman(now) {
+const cx = pacman.x * tile + tile / 2;
+const cy = pacman.y * tile + tile / 2;
+
+if (gameState === "dying") {
+const t = Math.min(1, (now - (dyingUntil - 1400)) / 1400);
+const radius = tile * 0.42 * (1 - t * t);
+if (radius > 0.5) {
+ctx.fillStyle = "#ffed4a";
+ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
+ctx.shadowBlur = 14;
+ctx.beginPath();
+ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+ctx.fill();
+ctx.shadowBlur = 0;
+}
+return;
+}
+
+const mouth = Math.sin(now / 70) * 0.18 + 0.32;
+const angle = dirs[pacman.dir].angle;
+ctx.fillStyle = "#ffed4a";
+ctx.shadowColor = "rgba(255, 237, 74, 0.7)";
+ctx.shadowBlur = 14;
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.arc(cx, cy, tile * 0.42, angle + mouth, angle + Math.PI * 2 - mouth);
+ctx.closePath();
+ctx.fill();
+ctx.shadowBlur = 0;
+}
+
+function drawGhost(ghost, now) {
+if (ghost.eaten > 0) return;
+const px = ghost.x * tile;
+const py = ghost.y * tile;
+const wobble = Math.sin(now / 110 + ghost.x) * 1.5;
+const body = ghost.frightened > 0 ? (ghost.frightened < 10 && Math.floor(now / 120) % 2 ? "#fff" : "#243fff") : ghost.color;
+
+ctx.fillStyle = body;
+ctx.shadowColor = body;
+ctx.shadowBlur = 10;
+ctx.beginPath();
+ctx.arc(px + tile / 2, py + tile * 0.42 + wobble, tile * 0.36, Math.PI, 0);
+ctx.lineTo(px + tile * 0.86, py + tile * 0.84);
+ctx.lineTo(px + tile * 0.68, py + tile * 0.72);
+ctx.lineTo(px + tile * 0.5, py + tile * 0.84);
+ctx.lineTo(px + tile * 0.32, py + tile * 0.72);
+ctx.lineTo(px + tile * 0.14, py + tile * 0.84);
+ctx.closePath();
+ctx.fill();
+ctx.shadowBlur = 0;
+
+const look = dirs[ghost.dir];
+ctx.fillStyle = "#fff";
+ctx.beginPath();
+ctx.arc(px + tile * 0.37, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
+ctx.arc(px + tile * 0.63, py + tile * 0.43, tile * 0.1, 0, Math.PI * 2);
+ctx.fill();
+
+ctx.fillStyle = "#081238";
+ctx.beginPath();
+ctx.arc(px + tile * 0.37 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
+ctx.arc(px + tile * 0.63 + look.x * 2, py + tile * 0.43 + look.y * 2, tile * 0.045, 0, Math.PI * 2);
+ctx.fill();
+}
+
+function drawFloaters(now) {
+floaters = floaters.filter((item) => now - item.born < item.ttl);
+ctx.textAlign = "center";
+ctx.font = "bold 12px Consolas, Monaco, monospace";
+floaters.forEach((item) => {
+const t = (now - item.born) / item.ttl;
+ctx.globalAlpha = 1 - t;
+ctx.fillStyle = item.color;
+ctx.fillText(item.text, item.x * tile + tile / 2, item.y * tile + tile / 2 - t * 22);
+});
+ctx.globalAlpha = 1;
+}
+
+function spawnParticles(px, py, color, count = 16) {
+const cx = px * tile + tile / 2;
+const cy = py * tile + tile / 2;
+for (let i = 0; i < count; i += 1) {
+const angle = Math.random() * Math.PI * 2;
+const speed = 0.8 + Math.random() * 2.6;
+particles.push({
+x: cx,
+y: cy,
+vx: Math.cos(angle) * speed,
+vy: Math.sin(angle) * speed - 0.8,
+life: 0,
+ttl: 420 + Math.random() * 300
+});
+}
+if (particles.length > 260) particles.splice(0, particles.length - 260);
+}
+
+function updateParticles() {
+particles = particles.filter((p) => p.life < p.ttl);
+for (const p of particles) {
+p.life += 16.67;
+p.x += p.vx;
+p.y += p.vy;
+p.vx *= 0.94;
+p.vy = p.vy * 0.94 + 0.12;
+}
+}
+
+function drawParticles() {
+for (const p of particles) {
+const t = p.life / p.ttl;
+ctx.globalAlpha = Math.max(0, 1 - t);
+ctx.fillStyle = p.color;
+ctx.beginPath();
+ctx.arc(p.x, p.y, 0.5 + 2.4 * (1 - t), 0, Math.PI * 2);
+ctx.fill();
+}
+ctx.globalAlpha = 1;
+}
+
+function drawFruit(now) {
+if (!fruit) return;
+if (now > fruit.expires) {
+fruit = null;
+nextFruitAt = now + 8000;
+return;
+}
+if (fruit.expires - now < 2500 && Math.floor(now / 140) % 2) return;
+const px = fruit.x * tile + tile / 2;
+const py = fruit.y * tile + tile / 2;
+const pulse = 1 + Math.sin(now / 150) * 0.12;
+ctx.save();
+ctx.translate(px, py);
+ctx.scale(pulse, pulse);
+ctx.fillStyle = fruit.color;
+ctx.shadowColor = fruit.color;
+ctx.shadowBlur = 12;
+ctx.beginPath();
+ctx.arc(0, -2, tile * 0.3, 0, Math.PI * 2);
+ctx.fill();
+ctx.shadowBlur = 0;
+ctx.fillStyle = "#7dff8a";
+ctx.beginPath();
+ctx.ellipse(0, -tile * 0.38, 2.5, 6, 0.5, 0, Math.PI * 2);
+ctx.fill();
+ctx.restore();
+ctx.textAlign = "center";
+ctx.font = "bold 10px Consolas, Monaco, monospace";
+ctx.fillStyle = "#f6f7ff";
+ctx.fillText(String(fruit.points), px, py + tile * 0.6);
+}
+
+function drawLives() {
+for (let i = 0; i < lives; i += 1) {
+const cx = 14 + i * 18;
+const cy = canvas.height - 9;
+ctx.fillStyle = "#ffed4a";
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.arc(cx, cy, 7, 0.35, Math.PI * 2 - 0.35);
+ctx.closePath();
+ctx.fill();
+}
+}
+
+function overlay(title, subtitle) {
+ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = "#ffed4a";
+ctx.textAlign = "center";
+ctx.font = "bold 36px Consolas, Monaco, monospace";
+ctx.shadowColor = "rgba(255, 237, 74, 0.8)";
+ctx.shadowBlur = 16;
+ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 16);
+ctx.shadowBlur = 0;
+ctx.fillStyle = "#f6f7ff";
+ctx.font = "16px Consolas, Monaco, monospace";
+ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
+}
+
+function draw(now = performance.now()) {
+drawMaze();
+drawDots(now);
+drawFruit(now);
+if (pacman) drawPacman(now);
+ghosts.forEach((ghost) => drawGhost(ghost, now));
+drawParticles();
+drawFloaters(now);
+drawLives();
+
+if (gameState === "title") overlay("PACMAN", `Record ${best} — Entrée, Espace ou Jouer`);
+if (gameState === "ready") overlay("READY!", "Prépare ton virage");
+if (gameState === "paused") overlay("PAUSE", "P pour reprendre");
+if (gameState === "levelClear") overlay("NIVEAU TERMINE", "Niveau suivant...");
+if (gameState === "gameOver") overlay("GAME OVER", "Entrée, Espace ou Jouer pour recommencer");
+}
+
+function update(now) {
+updateParticles();
+
+if (gameState === "ready" && now >= stateUntil) {
+gameState = "playing";
+lastPlayerMove = now;
+lastGhostMove = now;
+}
+
+if (gameState === "dying" && now >= dyingUntil) {
+if (lives <= 0) {
+gameState = "gameOver";
+} else {
+resetAfterHit();
+}
+}
+
+if (gameState === "levelClear" && now >= stateUntil) {
+nextLevel();
+}
+
+if (gameState === "playing") {
+if (!fruit && now >= nextFruitAt) {
+const fi = Math.min(level - 1, fruits.length - 1);
+fruit = {
+x: 10,
+y: 11,
+type: fi,
+points: fruits[fi].points,
+color: fruits[fi].color,
+born: now,
+expires: now + 9000
+};
+playFruitSound();
+}
+}
+
+if (gameState === "playing" && now - lastPlayerMove >= playerDelay()) {
+moveUnit(pacman);
+eatDots();
+if (gameState === "playing") collide();
+lastPlayerMove = now;
+}
+
+if (gameState === "playing" && now - lastGhostMove >= ghostDelay()) {
+moveGhosts();
+collide();
+lastGhostMove = now;
+}
+
+draw(now);
+requestAnimationFrame(update);
+}
+
+document.addEventListener("keydown", (event) => {
+const map = {
+ArrowUp: "up",
+w: "up",
+z: "up",
+ArrowRight: "right",
+d: "right",
+ArrowDown: "down",
+s: "down",
+ArrowLeft: "left",
+a: "left",
+q: "left"
+};
+const dir = map[event.key] || map[event.key.toLowerCase()];
+if (dir) {
+event.preventDefault();
+setDirection(dir);
+return;
+}
+if (event.key === "Enter" || event.key === " ") {
+event.preventDefault();
+if (gameState === "title" || gameState === "gameOver") newGame();
+}
+if (event.key.toLowerCase() === "p") togglePause();
+if (event.key.toLowerCase() === "r") newGame();
+});
+
+document.addEventListener("visibilitychange", () => {
+if (document.hidden && gameState === "playing") {
+gameState = "paused";
+lastPlayerMove = performance.now();
+lastGhostMove = performance.now();
+draw();
+}
+});
+
+startBtn.addEventListener("click", newGame);
+restartBtn.addEventListener("click", newGame);
+pauseBtn.addEventListener("click", togglePause);
+musicBtn.addEventListener("click", toggleMusic);
+songBtn.addEventListener("click", () => {
+window.open("https://www.youtube.com/watch?v=kJp3jISVNY0", "_blank", "noopener");
+});
+document.querySelectorAll("[data-dir]").forEach((button) => {
+button.addEventListener("click", () => setDirection(button.dataset.dir));
+});
+
+buildMazeCache();
+buildLevel();
+gameState = "title";
+updateHud();
+updateMusicButton();
+if (musicEnabled) musicTimer = setInterval(playMusicStep, 155);
+requestAnimationFrame(update);
+</script>
 </body>
 </html>
