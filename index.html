@@ -24,6 +24,12 @@
       box-sizing: border-box;
     }
 
+    button,
+    input {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       min-height: 100vh;
       margin: 0;
@@ -35,6 +41,7 @@
         var(--bg);
       color: var(--text);
       font-family: Consolas, Monaco, "Courier New", monospace;
+      overscroll-behavior: none;
     }
 
     main {
@@ -166,6 +173,9 @@
       background: #000;
       border-radius: 6px;
       image-rendering: auto;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .help {
@@ -178,14 +188,18 @@
 
     .touch-pad {
       display: none;
-      grid-template-columns: repeat(3, 46px);
+      grid-template-columns: repeat(3, 60px);
       gap: 6px;
       justify-content: center;
     }
 
     .touch-pad button {
-      width: 46px;
-      min-height: 42px;
+      width: 60px;
+      font-size: 18px;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      min-height: 56px;
       padding: 0;
     }
 
@@ -554,6 +568,15 @@
       <canvas id="game" aria-label="Jeu Pacman"></canvas>
     </section>
 
+    <section class="touch-pad" aria-label="Contrôles tactiles">
+      <button class="empty" tabindex="-1" type="button"></button>
+      <button data-dir="up" type="button" data-i18n="up">Haut</button>
+      <button class="empty" tabindex="-1" type="button"></button>
+      <button data-dir="left" type="button" data-i18n="left">Gauche</button>
+      <button data-dir="down" type="button" data-i18n="down">Bas</button>
+      <button data-dir="right" type="button" data-i18n="right">Droite</button>
+    </section>
+
     <section class="yt-wrap" id="ytWrap" aria-label="Lecteur musique" hidden>
       <div class="yt-bar">
         <span data-i18n="music1984">Musique 1984</span>
@@ -572,15 +595,6 @@
       <p id="nameHint" class="name-hint"></p>
       <div class="board-title" id="boardTitle">TOP 5 LOCAL</div>
       <ol id="boardList" class="board-list"></ol>
-    </section>
-
-    <section class="touch-pad" aria-label="Contrôles tactiles">
-      <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="up" type="button" data-i18n="up">Haut</button>
-      <button class="empty" tabindex="-1" type="button"></button>
-      <button data-dir="left" type="button" data-i18n="left">Gauche</button>
-      <button data-dir="down" type="button" data-i18n="down">Bas</button>
-      <button data-dir="right" type="button" data-i18n="right">Droite</button>
     </section>
 
     <footer class="footer">
@@ -2212,8 +2226,34 @@
       updateMusicButton();
     });
     document.querySelectorAll("[data-dir]").forEach((button) => {
-      button.addEventListener("click", () => setDirection(button.dataset.dir));
+      const steer = () => { if (!welcomeEl.hidden) setDirection(button.dataset.dir); };
+      button.addEventListener("pointerdown", steer);
+      button.addEventListener("click", steer);
     });
+
+    let swipeStart = null;
+    canvas.addEventListener("touchstart", (event) => {
+      if (!welcomeEl.hidden) return;
+      const t = event.touches[0];
+      swipeStart = { x: t.clientX, y: t.clientY };
+    }, { passive: true });
+
+    canvas.addEventListener("touchmove", (event) => {
+      if (!swipeStart) return;
+      const t = event.touches[0];
+      const dx = t.clientX - swipeStart.x;
+      const dy = t.clientY - swipeStart.y;
+      if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+      const dir = Math.abs(dx) > Math.abs(dy)
+        ? (dx > 0 ? "right" : "left")
+        : (dy > 0 ? "down" : "up");
+      setDirection(dir);
+      swipeStart = { x: t.clientX, y: t.clientY };
+      if (event.cancelable) event.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", () => { swipeStart = null; });
+    canvas.addEventListener("touchcancel", () => { swipeStart = null; });
 
     introSkip.addEventListener("click", () => {
       stopIntro();
