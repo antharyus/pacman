@@ -537,6 +537,7 @@
         <button id="pauseBtn" type="button" class="icon-btn" data-i18n-title="pause" title="Pause" aria-label="Pause">⏸️</button>
         <button id="musicBtn" type="button" class="icon-btn" data-i18n-title="music" title="Musique" aria-label="Musique">🎵</button>
         <button id="restartBtn" type="button" class="icon-btn" data-i18n-title="restart" title="Redémarrer" aria-label="Redémarrer">🔄</button>
+        <button id="shareBtn" type="button" class="icon-btn" data-i18n-title="share" title="Partager" aria-label="Partager">🔗</button>
         <button id="langBtn" type="button" class="lang-btn">🌐 FR</button>
       </div>
     </section>
@@ -601,6 +602,7 @@
     const pauseBtn = document.getElementById("pauseBtn");
     const musicBtn = document.getElementById("musicBtn");
     const restartBtn = document.getElementById("restartBtn");
+    const shareBtn = document.getElementById("shareBtn");
     const ytWrap = document.getElementById("ytWrap");
     const ytClose = document.getElementById("ytClose");
     const nameInput = document.getElementById("nameInput");
@@ -769,6 +771,9 @@
         music: "Musique",
         musicOn: "Musique ON",
         restart: "Redémarrer",
+        share: "Partager",
+        shareMsg: "🎮 Joue à Pacman Arcade, gratuit dans ton navigateur ! https://antharyus.github.io/pacman/",
+        copied: "Copié !",
         switchLang: "Changer de langue",
         score: "Score",
         best: "Record",
@@ -813,6 +818,9 @@
         music: "Music",
         musicOn: "Music ON",
         restart: "Restart",
+        share: "Share",
+        shareMsg: "🎮 Play Pacman Arcade, free in your browser! https://antharyus.github.io/pacman/",
+        copied: "Copied!",
         switchLang: "Switch language",
         score: "Score",
         best: "Best",
@@ -857,6 +865,9 @@
         music: "音乐",
         musicOn: "音乐开",
         restart: "重新开始",
+        share: "分享",
+        shareMsg: "🎮 来玩吃豆人街机版，浏览器免费畅玩！ https://antharyus.github.io/pacman/",
+        copied: "已复制！",
         switchLang: "切换语言",
         score: "分数",
         best: "最高分",
@@ -2113,6 +2124,30 @@
     startBtn.addEventListener("click", startGame);
     restartBtn.addEventListener("click", startGame);
     pauseBtn.addEventListener("click", togglePause);
+    shareBtn.addEventListener("click", () => {
+      const text = t("shareMsg");
+      const fallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (err) { /* ignore */ }
+        ta.remove();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(fallback);
+      } else {
+        fallback();
+      }
+      shareBtn.textContent = "✅";
+      shareBtn.title = t("copied");
+      shareBtn.setAttribute("aria-label", t("copied"));
+      setTimeout(() => {
+        shareBtn.textContent = "🔗";
+        shareBtn.title = t("share");
+        shareBtn.setAttribute("aria-label", t("share"));
+      }, 1800);
+    });
     const YT_VIDEO_ID = "kJp3jISVNY0";
     let ytPlayer = null;
     let ytApiReady = false;

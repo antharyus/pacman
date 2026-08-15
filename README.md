@@ -1,21 +1,35 @@
-# 🕹️ Pacman
+# 🕹️ Pacman Arcade
 
-*Petit projet de test — je débute en dev, donc soyez indulgents ! 😄*
+> Mon premier jeu web : un Pac-Man complet, jouable **gratuitement dans le navigateur**.
 
-Une version du jeu Pacman codée en HTML/CSS/JavaScript, jouable directement dans le navigateur.
+## ▶️ Joue en ligne
 
-## À propos
+**[https://antharyus.github.io/pacman/](https://antharyus.github.io/pacman/)**
 
-Ce repo est mon tout premier projet public sur GitHub. C'est avant tout un test pour apprendre : Git, GitHub, et un peu de code de jeu (déplacement, fantômes, animations, fruits bonus, vies...).
+Aucune installation, aucun compte — ça tourne aussi sur mobile (contrôles tactiles).
 
-## Comment jouer
+## ✨ Fonctionnalités
 
-Ouvrez simplement le fichier `index.html` dans un navigateur, ou activez GitHub Pages sur ce repo pour y jouer en ligne.
+- 🎬 **Écran d'accueil rétro animé** : Pacman avale les fantômes
+- 🗺️ **3 labyrinthes** de plus en plus grands, qui changent selon le niveau
+- 🏆 **Classement mondial en temps réel** (Top 5 partagé entre tous les joueurs)
+- 🌐 **3 langues** : Français / English / 中文
+- 🎵 **Musique intégrée** + sons générés en Web Audio
+- 👻 4 fantômes, fruits bonus, vies, niveaux progressifs
+- 🎉 Animations de victoire et de game over
+- 📱 Jouable au clavier et au tactile
 
-## Technos
+## 🛠️ Technos
 
-- HTML / CSS / JavaScript (aucune librairie externe)
+- **HTML / CSS / JavaScript pur** — un seul fichier, zéro librairie
+- [Supabase](https://supabase.com) pour le classement mondial
+- GitHub Pages pour l'hébergement
+- GitHub Actions pour garder la base de données active
 
-## Special thanks
+## 🚀 Lancer en local
 
-✨ Un grand merci à [Freebuff](https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611), l'agent de code gratuit qui a aidé à créer ce jeu. 🚀 C'est gratuit, essayez-le ici !
+Ouvre simplement `index.html` dans un navigateur (aucun serveur requis).
+
+## 🙏 Special thanks
+
+✨ Un grand merci à [Freebuff](https://freebuff.com/get-started?ref=ref-1defc500-2acd-4efa-8325-eb66cbca9611), l'agent de code gratuit qui m'a aidé à créer ce jeu. 🚀 C'est gratuit, essayez-le !
