@@ -15,4 +15,3 @@ Ouvrez simplement le fichier `index.html` dans un navigateur, ou activez GitHub 
 ## Technos
 
 - HTML / CSS / JavaScript (aucune librairie externe)
-- 
